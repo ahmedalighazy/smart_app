@@ -7,17 +7,14 @@ class FoodItemCard extends StatefulWidget {
   final Map<String, dynamic> food;
   final Map<String, dynamic> category;
 
-  const FoodItemCard({
-    super.key,
-    required this.food,
-    required this.category,
-  });
+  const FoodItemCard({super.key, required this.food, required this.category});
 
   @override
   State<FoodItemCard> createState() => _FoodItemCardState();
 }
 
-class _FoodItemCardState extends State<FoodItemCard> with SingleTickerProviderStateMixin {
+class _FoodItemCardState extends State<FoodItemCard>
+    with SingleTickerProviderStateMixin {
   bool _isExpanded = false;
   late AnimationController _controller;
   late Animation<double> _expandAnimation;
@@ -65,7 +62,7 @@ class _FoodItemCardState extends State<FoodItemCard> with SingleTickerProviderSt
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: categoryColor.withOpacity(0.1),
+              color: categoryColor.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, 4),
               spreadRadius: 0,
@@ -89,14 +86,14 @@ class _FoodItemCardState extends State<FoodItemCard> with SingleTickerProviderSt
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          categoryColor.withOpacity(0.8),
+                          categoryColor.withValues(alpha: 0.8),
                           categoryColor,
                         ],
                       ),
                       borderRadius: BorderRadius.circular(15),
                       boxShadow: [
                         BoxShadow(
-                          color: categoryColor.withOpacity(0.3),
+                          color: categoryColor.withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
@@ -156,7 +153,7 @@ class _FoodItemCardState extends State<FoodItemCard> with SingleTickerProviderSt
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: categoryColor.withOpacity(0.1),
+                      color: categoryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Center(
@@ -180,7 +177,7 @@ class _FoodItemCardState extends State<FoodItemCard> with SingleTickerProviderSt
               sizeFactor: _expandAnimation,
               child: Container(
                 decoration: BoxDecoration(
-                  color: categoryColor.withOpacity(0.05),
+                  color: categoryColor.withValues(alpha: 0.05),
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(20),
                     bottomRight: Radius.circular(20),
@@ -197,7 +194,7 @@ class _FoodItemCardState extends State<FoodItemCard> with SingleTickerProviderSt
                         gradient: LinearGradient(
                           colors: [
                             Colors.transparent,
-                            categoryColor.withOpacity(0.2),
+                            categoryColor.withValues(alpha: 0.2),
                             Colors.transparent,
                           ],
                         ),
@@ -240,13 +237,13 @@ class _FoodItemCardState extends State<FoodItemCard> with SingleTickerProviderSt
                         gradient: LinearGradient(
                           colors: [
                             categoryColor,
-                            categoryColor.withOpacity(0.8),
+                            categoryColor.withValues(alpha: 0.8),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: categoryColor.withOpacity(0.3),
+                            color: categoryColor.withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
@@ -256,7 +253,8 @@ class _FoodItemCardState extends State<FoodItemCard> with SingleTickerProviderSt
                         color: Colors.transparent,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(12),
-                          onTap: () => _showAddMealDialog(context, categoryColor),
+                          onTap: () =>
+                              _showAddMealDialog(context, categoryColor),
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             textDirection: TextDirection.rtl,
@@ -305,23 +303,16 @@ class _FoodItemCardState extends State<FoodItemCard> with SingleTickerProviderSt
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: color.withOpacity(0.3),
-              width: 2,
-            ),
+            border: Border.all(color: color.withValues(alpha: 0.3), width: 2),
           ),
-          child: Icon(
-            icon,
-            color: color,
-            size: 24,
-          ),
+          child: Icon(icon, color: color, size: 24),
         ),
         const SizedBox(height: 8),
         Text(
           label,
           style: TextStyle(
             fontSize: 12,
-            color: color.withOpacity(0.8),
+            color: color.withValues(alpha: 0.8),
             fontWeight: FontWeight.w600,
           ),
           textDirection: TextDirection.rtl,
@@ -364,7 +355,7 @@ class _FoodItemCardState extends State<FoodItemCard> with SingleTickerProviderSt
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF2C3E50),
-                        ),
+                      ),
                       textDirection: TextDirection.rtl,
                     ),
                     IconButton(
@@ -374,7 +365,7 @@ class _FoodItemCardState extends State<FoodItemCard> with SingleTickerProviderSt
                   ],
                 ),
                 const SizedBox(height: 20),
-                
+
                 // Food Info
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -420,7 +411,7 @@ class _FoodItemCardState extends State<FoodItemCard> with SingleTickerProviderSt
                   ),
                 ),
                 const SizedBox(height: 20),
-                
+
                 // Meal Type Selection
                 const Text(
                   'اختر نوع الوجبة',
@@ -432,7 +423,7 @@ class _FoodItemCardState extends State<FoodItemCard> with SingleTickerProviderSt
                   textDirection: TextDirection.rtl,
                 ),
                 const SizedBox(height: 12),
-                
+
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -473,7 +464,7 @@ class _FoodItemCardState extends State<FoodItemCard> with SingleTickerProviderSt
                   ],
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Add Button
                 SizedBox(
                   width: double.infinity,
@@ -487,23 +478,27 @@ class _FoodItemCardState extends State<FoodItemCard> with SingleTickerProviderSt
                         protein: widget.food['protein']?.toString() ?? '0',
                         carbs: widget.food['carbs']?.toString() ?? '0',
                         fat: widget.food['fat']?.toString() ?? '0',
-                        categoryName: widget.category['name']?.toString() ?? 'طعام',
-                        categoryEmoji: widget.category['emoji']?.toString() ?? '🍽️',
-                        categoryColorValue: (widget.category['color'] as Color?)?.value ?? Colors.grey.value,
+                        categoryName:
+                            widget.category['name']?.toString() ?? 'طعام',
+                        categoryEmoji:
+                            widget.category['emoji']?.toString() ?? '🍽️',
+                        categoryColorValue:
+                            (widget.category['color'] as Color?)?.toARGB32() ??
+                            Colors.grey.toARGB32(),
                         addedAt: DateTime.now(),
                         mealType: selectedMealType,
                         imageUrl: widget.category['imageUrl']?.toString(),
                       );
 
                       HiveService.addMeal(meal);
-                      
+
                       // Show notification
                       NotificationService().showMealNotification(
                         mealName: meal.name,
                         calories: meal.calories,
                         protein: meal.protein,
                       );
-                      
+
                       // Close dialog and navigate
                       Navigator.pop(context);
                       Navigator.pushNamed(context, '/my_meals');
@@ -541,7 +536,7 @@ class _FoodItemCardState extends State<FoodItemCard> with SingleTickerProviderSt
     Function(String) onSelected,
   ) {
     final isSelected = value == selectedValue;
-    
+
     return GestureDetector(
       onTap: () => onSelected(value),
       child: AnimatedContainer(

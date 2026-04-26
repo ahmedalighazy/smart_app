@@ -5,7 +5,6 @@ import 'package:smart_nutrition/presentation/screens/home_screen/widgets/food_de
 import '../../../core/constants/colors.dart';
 import '../../../data/services/hive_service.dart';
 import '../../../data/services/meal_model.dart';
-import '../../../data/services/notification_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'widgets/category_card.dart';
 import 'widgets/category_preview.dart';
@@ -40,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
-    
+
     _headerFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _headerAnimationController,
@@ -53,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    
+
     _fabScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _fabAnimationController,
@@ -150,7 +149,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         textDirection: TextDirection.rtl,
                       ),
                       const SizedBox(height: 8),
-
                     ],
                   ),
                 ),
@@ -247,7 +245,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       icon: Icons.camera_alt,
                       title: 'ماسح الطعام',
                       color: Colors.blue,
-                      onTap: () => Navigator.pushNamed(context, '/food_scanner'),
+                      onTap: () =>
+                          Navigator.pushNamed(context, '/food_scanner'),
                     ),
                     const SizedBox(height: 12),
                     _buildSimpleFeatureCard(
@@ -300,11 +299,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  icon,
-                  color: color,
-                  size: 24,
-                ),
+                child: Icon(icon, color: color, size: 24),
               ),
               const SizedBox(width: 15),
               Expanded(
@@ -318,11 +313,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   textDirection: TextDirection.rtl,
                 ),
               ),
-              Icon(
-                Icons.arrow_back_ios,
-                size: 16,
-                color: Colors.grey.shade400,
-              ),
+              Icon(Icons.arrow_back_ios, size: 16, color: Colors.grey.shade400),
             ],
           ),
         ),
@@ -345,7 +336,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               borderRadius: BorderRadius.circular(30),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -416,7 +410,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildCategoriesSlider() {
     final totalItems = foodCategories.length + 1; // +1 for add button
-    
+
     return RepaintBoundary(
       child: SizedBox(
         height: 140,
@@ -515,14 +509,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: isSelected
-                ? [
-                    Colors.purple.shade400,
-                    Colors.purple.shade600,
-                  ]
-                : [
-                    Colors.purple.shade300,
-                    Colors.purple.shade500,
-                  ],
+                ? [Colors.purple.shade400, Colors.purple.shade600]
+                : [Colors.purple.shade300, Colors.purple.shade500],
           ),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
@@ -564,36 +552,31 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-
-
   void _navigateToDetails() {
     Navigator.push(
       context,
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => FoodDetailsScreen(
-          category: foodCategories[_selectedIndex - 1],
-        ),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            FoodDetailsScreen(category: foodCategories[_selectedIndex - 1]),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(1.0, 0.0);
           const end = Offset.zero;
           const curve = Curves.easeInOutCubic;
-          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          var tween = Tween(
+            begin: begin,
+            end: end,
+          ).chain(CurveTween(curve: curve));
           var offsetAnimation = animation.drive(tween);
-          
+
           return SlideTransition(
             position: offsetAnimation,
-            child: FadeTransition(
-              opacity: animation,
-              child: child,
-            ),
+            child: FadeTransition(opacity: animation, child: child),
           );
         },
         transitionDuration: const Duration(milliseconds: 400),
       ),
     );
   }
-
-
 
   void _showAddMealDialog() {
     String? selectedCategory;
@@ -635,10 +618,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  
+
                   // Meal Type
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey.shade300),
                       borderRadius: BorderRadius.circular(15),
@@ -650,7 +636,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         const SizedBox(width: 12),
                         const Text(
                           'نوع الوجبة:',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -659,10 +648,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             isExpanded: true,
                             underline: const SizedBox(),
                             items: const [
-                              DropdownMenuItem(value: 'breakfast', child: Text('فطور', textDirection: TextDirection.rtl)),
-                              DropdownMenuItem(value: 'lunch', child: Text('غداء', textDirection: TextDirection.rtl)),
-                              DropdownMenuItem(value: 'dinner', child: Text('عشاء', textDirection: TextDirection.rtl)),
-                              DropdownMenuItem(value: 'snack', child: Text('وجبة خفيفة', textDirection: TextDirection.rtl)),
+                              DropdownMenuItem(
+                                value: 'breakfast',
+                                child: Text(
+                                  'فطور',
+                                  textDirection: TextDirection.rtl,
+                                ),
+                              ),
+                              DropdownMenuItem(
+                                value: 'lunch',
+                                child: Text(
+                                  'غداء',
+                                  textDirection: TextDirection.rtl,
+                                ),
+                              ),
+                              DropdownMenuItem(
+                                value: 'dinner',
+                                child: Text(
+                                  'عشاء',
+                                  textDirection: TextDirection.rtl,
+                                ),
+                              ),
+                              DropdownMenuItem(
+                                value: 'snack',
+                                child: Text(
+                                  'وجبة خفيفة',
+                                  textDirection: TextDirection.rtl,
+                                ),
+                              ),
                             ],
                             onChanged: (value) {
                               setDialogState(() {
@@ -675,10 +688,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Category Selection
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey.shade300),
                       borderRadius: BorderRadius.circular(15),
@@ -687,21 +703,30 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       textDirection: TextDirection.rtl,
                       children: [
                         Text(
-                          selectedCategory != null 
-                              ? foodCategories.firstWhere((c) => c['name'] == selectedCategory)['emoji'] as String
+                          selectedCategory != null
+                              ? foodCategories.firstWhere(
+                                      (c) => c['name'] == selectedCategory,
+                                    )['emoji']
+                                    as String
                               : '🍽️',
                           style: const TextStyle(fontSize: 24),
                         ),
                         const SizedBox(width: 12),
                         const Text(
                           'الفئة:',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: DropdownButton<String>(
                             value: selectedCategory,
-                            hint: const Text('اختر الفئة', textDirection: TextDirection.rtl),
+                            hint: const Text(
+                              'اختر الفئة',
+                              textDirection: TextDirection.rtl,
+                            ),
                             isExpanded: true,
                             underline: const SizedBox(),
                             items: foodCategories.map((category) {
@@ -726,11 +751,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Food Item Selection
                   if (selectedCategory != null)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.grey.shade300),
                         borderRadius: BorderRadius.circular(15),
@@ -742,32 +770,50 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           const SizedBox(width: 12),
                           const Text(
                             'الطعام:',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: DropdownButton<String>(
                               value: selectedFoodItem,
-                              hint: const Text('اختر الطعام', textDirection: TextDirection.rtl),
+                              hint: const Text(
+                                'اختر الطعام',
+                                textDirection: TextDirection.rtl,
+                              ),
                               isExpanded: true,
                               underline: const SizedBox(),
-                              items: (foodCategories
-                                      .firstWhere((c) => c['name'] == selectedCategory)['items'] as List)
-                                  .map((item) {
-                                return DropdownMenuItem<String>(
-                                  value: item['name'] as String,
-                                  child: Text(
-                                    item['name'] as String,
-                                    textDirection: TextDirection.rtl,
-                                  ),
-                                );
-                              }).toList(),
+                              items:
+                                  (foodCategories.firstWhere(
+                                            (c) =>
+                                                c['name'] == selectedCategory,
+                                          )['items']
+                                          as List)
+                                      .map((item) {
+                                        return DropdownMenuItem<String>(
+                                          value: item['name'] as String,
+                                          child: Text(
+                                            item['name'] as String,
+                                            textDirection: TextDirection.rtl,
+                                          ),
+                                        );
+                                      })
+                                      .toList(),
                               onChanged: (value) {
                                 setDialogState(() {
                                   selectedFoodItem = value;
-                                  selectedFood = (foodCategories
-                                          .firstWhere((c) => c['name'] == selectedCategory)['items'] as List)
-                                      .firstWhere((item) => item['name'] == value);
+                                  selectedFood =
+                                      (foodCategories.firstWhere(
+                                                (c) =>
+                                                    c['name'] ==
+                                                    selectedCategory,
+                                              )['items']
+                                              as List)
+                                          .firstWhere(
+                                            (item) => item['name'] == value,
+                                          );
                                 });
                               },
                             ),
@@ -776,7 +822,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                     ),
                   const SizedBox(height: 20),
-                  
+
                   // Nutrition Info Display
                   if (selectedFood != null)
                     Container(
@@ -836,7 +882,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                     ),
                   const SizedBox(height: 24),
-                  
+
                   // Add Button
                   SizedBox(
                     width: double.infinity,
@@ -845,10 +891,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       onPressed: selectedFood == null
                           ? null
                           : () {
-                              final category = foodCategories.firstWhere((c) => c['name'] == selectedCategory);
-                              
+                              final category = foodCategories.firstWhere(
+                                (c) => c['name'] == selectedCategory,
+                              );
+
                               final meal = MealModel(
-                                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                                id: DateTime.now().millisecondsSinceEpoch
+                                    .toString(),
                                 name: selectedFood!['name'] as String,
                                 calories: selectedFood!['calories'] as String,
                                 protein: selectedFood!['protein'] as String,
@@ -856,7 +905,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 fat: selectedFood!['fat'] as String,
                                 categoryName: category['name'] as String,
                                 categoryEmoji: category['emoji'] as String,
-                                categoryColorValue: (category['color'] as Color).value,
+                                categoryColorValue: (category['color'] as Color)
+                                    .toARGB32(),
                                 addedAt: DateTime.now(),
                                 mealType: selectedMealType,
                                 imageUrl: category['imageUrl'] as String?,
@@ -864,7 +914,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                               HiveService.addMeal(meal);
                               Navigator.pop(context);
-                              
+
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
@@ -881,7 +931,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               );
                             },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: selectedFood == null ? Colors.grey : AppColors.primary,
+                        backgroundColor: selectedFood == null
+                            ? Colors.grey
+                            : AppColors.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
@@ -917,10 +969,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey.shade600,
-          ),
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
           textDirection: TextDirection.rtl,
         ),
         const SizedBox(height: 2),
@@ -946,9 +995,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
         backgroundColor: AppColors.primary,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
         duration: const Duration(seconds: 3),
       ),

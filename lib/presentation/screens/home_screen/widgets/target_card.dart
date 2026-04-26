@@ -5,11 +5,7 @@ class TargetCard extends StatelessWidget {
   final IconData icon;
   final String text;
 
-  const TargetCard({
-    super.key,
-    required this.icon,
-    required this.text,
-  });
+  const TargetCard({super.key, required this.icon, required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +17,7 @@ class TargetCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: AppColors.primary, size: 20),
@@ -32,10 +28,7 @@ class TargetCard extends StatelessWidget {
               text,
               textDirection: TextDirection.rtl,
               textAlign: TextAlign.right,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textDark,
-              ),
+              style: const TextStyle(fontSize: 14, color: AppColors.textDark),
             ),
           ),
         ],

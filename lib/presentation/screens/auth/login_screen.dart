@@ -68,6 +68,7 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final isSmallScreen = size.height < 700;
 
     return BlocListener<UserCubit, UserState>(
       listener: (context, state) {
@@ -105,7 +106,6 @@ class _LoginScreenState extends State<LoginScreen>
       },
       child: Scaffold(
         body: Container(
-          height: size.height,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
@@ -119,249 +119,265 @@ class _LoginScreenState extends State<LoginScreen>
             ),
           ),
           child: SafeArea(
-            child: SingleChildScrollView(
-              child: SizedBox(
-                height: size.height - MediaQuery.of(context).padding.top,
-                child: Column(
-                  children: [
-                    FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 40),
-                        child: Column(
-                          children: [
-                            TweenAnimationBuilder<double>(
-                              tween: Tween(begin: 0.8, end: 1.0),
-                              duration: const Duration(milliseconds: 800),
-                              curve: Curves.elasticOut,
-                              builder: (context, value, child) {
-                                return Transform.scale(
-                                  scale: value,
-                                  child: child,
-                                );
-                              },
-                              child: Container(
-                                width: 110,
-                                height: 110,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.2),
-                                      blurRadius: 25,
-                                      offset: const Offset(0, 10),
-                                    ),
-                                  ],
-                                ),
-                                child: ClipOval(
-                                  child: Image.asset(
-                                    'assets/images/logo_app.jpeg',
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return const Icon(
-                                        Icons.restaurant_menu,
-                                        size: 55,
-                                        color: AppColors.primary,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
+                    child: IntrinsicHeight(
+                      child: Column(
+                        children: [
+                          FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                vertical: isSmallScreen ? 24 : 40,
+                              ),
+                              child: Column(
+                                children: [
+                                  TweenAnimationBuilder<double>(
+                                    tween: Tween(begin: 0.8, end: 1.0),
+                                    duration: const Duration(milliseconds: 800),
+                                    curve: Curves.elasticOut,
+                                    builder: (context, value, child) {
+                                      return Transform.scale(
+                                        scale: value,
+                                        child: child,
                                       );
                                     },
+                                    child: Container(
+                                      width: isSmallScreen ? 90 : 110,
+                                      height: isSmallScreen ? 90 : 110,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(alpha: 0.2),
+                                            blurRadius: 25,
+                                            offset: const Offset(0, 10),
+                                          ),
+                                        ],
+                                      ),
+                                      child: ClipOval(
+                                        child: Image.asset(
+                                          'assets/images/logo_app.jpeg',
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) {
+                                            return Icon(
+                                              Icons.restaurant_menu,
+                                              size: isSmallScreen ? 45 : 55,
+                                              color: AppColors.primary,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            const Text(
-                              'Smart Nutrition',
-                              style: TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'تغذية ذكية لحياة صحية',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.white.withValues(alpha: 0.9),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    Expanded(
-                      child: SlideTransition(
-                        position: _slideAnimation,
-                        child: FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(32),
-                                topRight: Radius.circular(32),
-                              ),
-                            ),
-                            child: Form(
-                              key: _formKey,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'مرحباً بعودتك! 👋',
+                                  SizedBox(height: isSmallScreen ? 12 : 20),
+                                  Text(
+                                    'Smart Nutrition',
                                     style: TextStyle(
-                                      fontSize: 26,
+                                      fontSize: isSmallScreen ? 24 : 28,
                                       fontWeight: FontWeight.bold,
-                                      color: AppColors.textDark,
+                                      color: Colors.white,
+                                      letterSpacing: 1.2,
                                     ),
                                   ),
                                   const SizedBox(height: 6),
-                                  const Text(
-                                    'سجل دخولك للمتابعة',
+                                  Text(
+                                    'تغذية ذكية لحياة صحية',
                                     style: TextStyle(
-                                      fontSize: 15,
-                                      color: AppColors.textLight,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 28),
-
-                                  _buildInputField(
-                                    controller: _emailController,
-                                    label: 'البريد الإلكتروني',
-                                    hint: 'example@email.com',
-                                    icon: Icons.email_rounded,
-                                    keyboardType: TextInputType.emailAddress,
-                                    textDirection: TextDirection.ltr,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'من فضلك أدخل البريد الإلكتروني';
-                                      }
-                                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                                          .hasMatch(value)) {
-                                        return 'البريد الإلكتروني غير صحيح';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  const SizedBox(height: 18),
-
-                                  _buildInputField(
-                                    controller: _passwordController,
-                                    label: 'كلمة المرور',
-                                    hint: '••••••••',
-                                    icon: Icons.lock_rounded,
-                                    obscureText: _obscurePassword,
-                                    textDirection: TextDirection.ltr,
-                                    suffixIcon: IconButton(
-                                      icon: Icon(
-                                        _obscurePassword
-                                            ? Icons.visibility_off_rounded
-                                            : Icons.visibility_rounded,
-                                        color: AppColors.textLight,
-                                      ),
-                                      onPressed: () {
-                                        setState(() =>
-                                            _obscurePassword = !_obscurePassword);
-                                      },
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'من فضلك أدخل كلمة المرور';
-                                      }
-                                      if (value.length < 6) {
-                                        return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  const SizedBox(height: 8),
-
-
-                                  const SizedBox(height: 24),
-
-                                  _buildPrimaryButton(
-                                    onPressed: _isLoading ? null : _handleLogin,
-                                    isLoading: _isLoading,
-                                    text: 'تسجيل الدخول',
-                                  ),
-                                  const SizedBox(height: 20),
-
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Container(
-                                          height: 1,
-                                          color: AppColors.textHint
-                                              .withValues(alpha: 0.3),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 16),
-                                        child: Text(
-                                          'أو',
-                                          style: TextStyle(
-                                            color: AppColors.textLight
-                                                .withValues(alpha: 0.8),
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: Container(
-                                          height: 1,
-                                          color: AppColors.textHint
-                                              .withValues(alpha: 0.3),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-
-                                  const Spacer(),
-
-                                  Center(
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        const Text(
-                                          'ليس لديك حساب؟',
-                                          style: TextStyle(
-                                            color: AppColors.textLight,
-                                            fontSize: 15,
-                                          ),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.pushNamed(
-                                                context, '/register');
-                                          },
-                                          child: const Text(
-                                            'سجل الآن',
-                                            style: TextStyle(
-                                              color: AppColors.primary,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                      fontSize: isSmallScreen ? 13 : 14,
+                                      color: Colors.white.withValues(alpha: 0.9),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                        ),
+
+                          Expanded(
+                            child: SlideTransition(
+                              position: _slideAnimation,
+                              child: FadeTransition(
+                                opacity: _fadeAnimation,
+                                child: Container(
+                                  width: double.infinity,
+                                  constraints: BoxConstraints(
+                                    maxWidth: 600,
+                                  ),
+                                  padding: EdgeInsets.fromLTRB(
+                                    24,
+                                    isSmallScreen ? 24 : 32,
+                                    24,
+                                    24,
+                                  ),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(32),
+                                      topRight: Radius.circular(32),
+                                    ),
+                                  ),
+                                  child: Form(
+                                    key: _formKey,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'مرحباً بعودتك! 👋',
+                                          style: TextStyle(
+                                            fontSize: isSmallScreen ? 22 : 26,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.textDark,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          'سجل دخولك للمتابعة',
+                                          style: TextStyle(
+                                            fontSize: isSmallScreen ? 14 : 15,
+                                            color: AppColors.textLight,
+                                          ),
+                                        ),
+                                        SizedBox(height: isSmallScreen ? 20 : 28),
+
+                                        _buildInputField(
+                                          controller: _emailController,
+                                          label: 'البريد الإلكتروني',
+                                          hint: 'example@email.com',
+                                          icon: Icons.email_rounded,
+                                          keyboardType: TextInputType.emailAddress,
+                                          textDirection: TextDirection.ltr,
+                                          validator: (value) {
+                                            if (value == null || value.isEmpty) {
+                                              return 'من فضلك أدخل البريد الإلكتروني';
+                                            }
+                                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                                .hasMatch(value)) {
+                                              return 'البريد الإلكتروني غير صحيح';
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                        SizedBox(height: isSmallScreen ? 14 : 18),
+
+                                        _buildInputField(
+                                          controller: _passwordController,
+                                          label: 'كلمة المرور',
+                                          hint: '••••••••',
+                                          icon: Icons.lock_rounded,
+                                          obscureText: _obscurePassword,
+                                          textDirection: TextDirection.ltr,
+                                          suffixIcon: IconButton(
+                                            icon: Icon(
+                                              _obscurePassword
+                                                  ? Icons.visibility_off_rounded
+                                                  : Icons.visibility_rounded,
+                                              color: AppColors.textLight,
+                                            ),
+                                            onPressed: () {
+                                              setState(() =>
+                                                  _obscurePassword = !_obscurePassword);
+                                            },
+                                          ),
+                                          validator: (value) {
+                                            if (value == null || value.isEmpty) {
+                                              return 'من فضلك أدخل كلمة المرور';
+                                            }
+                                            if (value.length < 6) {
+                                              return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                        SizedBox(height: isSmallScreen ? 20 : 24),
+
+                                        _buildPrimaryButton(
+                                          onPressed: _isLoading ? null : _handleLogin,
+                                          isLoading: _isLoading,
+                                          text: 'تسجيل الدخول',
+                                        ),
+                                        SizedBox(height: isSmallScreen ? 16 : 20),
+
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Container(
+                                                height: 1,
+                                                color: AppColors.textHint
+                                                    .withValues(alpha: 0.3),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(
+                                                  horizontal: 16),
+                                              child: Text(
+                                                'أو',
+                                                style: TextStyle(
+                                                  color: AppColors.textLight
+                                                      .withValues(alpha: 0.8),
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: Container(
+                                                height: 1,
+                                                color: AppColors.textHint
+                                                    .withValues(alpha: 0.3),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: isSmallScreen ? 16 : 20),
+
+                                        Center(
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                'ليس لديك حساب؟',
+                                                style: TextStyle(
+                                                  color: AppColors.textLight,
+                                                  fontSize: isSmallScreen ? 14 : 15,
+                                                ),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.pushNamed(
+                                                      context, '/register');
+                                                },
+                                                child: Text(
+                                                  'سجل الآن',
+                                                  style: TextStyle(
+                                                    color: AppColors.primary,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: isSmallScreen ? 14 : 15,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
           ),
         ),

@@ -62,12 +62,20 @@ class AuthService {
     required String fullName,
   }) async {
     try {
+      print('🔵 Starting registration...');
+      print('📧 Email: $email');
+      print('👤 Username: $username');
+      print('📝 Full Name: $fullName');
+
       final response = await DioHelper.register(
         username: username,
         email: email,
         password: password,
         fullName: fullName,
       );
+
+      print('📥 Response Status: ${response.statusCode}');
+      print('📦 Response Data: ${response.data}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         // التحقق من وجود الـ token في الاستجابة
@@ -76,20 +84,34 @@ class AuthService {
         String? refreshToken;
 
         // محاولة الحصول على الـ token من أماكن مختلفة في الاستجابة
-        if (data['data'] != null && data['data']['access_token'] != null) {
-          accessToken = data['data']['access_token'];
-          refreshToken = data['data']['refresh_token'] ?? '';
-        } else if (data['access_token'] != null) {
-          accessToken = data['access_token'];
-          refreshToken = data['refresh_token'] ?? '';
-        } else if (data['token'] != null) {
-          accessToken = data['token'];
-          refreshToken = '';
+        if (data is Map) {
+          // Check nested data object
+          if (data['data'] != null && data['data'] is Map) {
+            accessToken = data['data']['access_token'];
+            refreshToken = data['data']['refresh_token'];
+          }
+          // Check direct token fields
+          else if (data['access_token'] != null) {
+            accessToken = data['access_token'];
+            refreshToken = data['refresh_token'];
+          }
+          // Check for 'token' field
+          else if (data['token'] != null) {
+            accessToken = data['token'];
+          }
+          // Check for 'tokens' object
+          else if (data['tokens'] != null && data['tokens'] is Map) {
+            accessToken = data['tokens']['access_token'];
+            refreshToken = data['tokens']['refresh_token'];
+          }
         }
 
-        if (accessToken != null) {
+        if (accessToken != null && accessToken.isNotEmpty) {
+          print('✅ Token found: ${accessToken.substring(0, 20)}...');
           await _saveTokens(accessToken, refreshToken ?? '');
           DioHelper.setToken(accessToken);
+        } else {
+          print('⚠️ No token in response, but registration might be successful');
         }
         
         return {
@@ -98,17 +120,36 @@ class AuthService {
           'message': 'تم التسجيل بنجاح',
         };
       } else {
+        print('❌ Registration failed with status: ${response.statusCode}');
         return {
           'success': false,
           'message': 'فشل التسجيل',
         };
       }
     } on DioException catch (e) {
+      print('❌ DioException during registration:');
+      print('Type: ${e.type}');
+      print('Message: ${e.message}');
+      print('Response: ${e.response?.data}');
+      print('Status Code: ${e.response?.statusCode}');
+      
+      String errorMessage = _handleError(e);
+      
+      // Handle specific error cases
+      if (e.response?.statusCode == 409 || e.response?.statusCode == 422) {
+        if (e.response?.data is Map && e.response?.data['message'] != null) {
+          errorMessage = e.response?.data['message'];
+        } else {
+          errorMessage = 'البريد الإلكتروني أو اسم المستخدم مستخدم بالفعل';
+        }
+      }
+      
       return {
         'success': false,
-        'message': _handleError(e),
+        'message': errorMessage,
       };
     } catch (e) {
+      print('❌ Unexpected error during registration: $e');
       return {
         'success': false,
         'message': 'حدث خطأ غير متوقع: $e',
@@ -192,26 +233,66 @@ class AuthService {
 
   // Handle Dio errors
   static String _handleError(DioException error) {
+    print('🔍 Handling error type: ${error.type}');
+    
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
-        return 'انتهت مهلة الاتصال';
+        return 'انتهت مهلة الاتصال. تحقق من اتصالك بالإنترنت';
       case DioExceptionType.sendTimeout:
-        return 'انتهت مهلة الإرسال';
+        return 'انتهت مهلة الإرسال. حاول مرة أخرى';
       case DioExceptionType.receiveTimeout:
-        return 'انتهت مهلة الاستقبال';
+        return 'انتهت مهلة الاستقبال. حاول مرة أخرى';
       case DioExceptionType.badResponse:
-        if (error.response?.statusCode == 401) {
-          return 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
-        } else if (error.response?.statusCode == 400) {
-          return 'بيانات غير صحيحة';
+        final statusCode = error.response?.statusCode;
+        final responseData = error.response?.data;
+        
+        print('📊 Status Code: $statusCode');
+        print('📦 Response Data: $responseData');
+        
+        // Try to get error message from response
+        if (responseData is Map) {
+          // Check for 'message' field
+          if (responseData['message'] != null) {
+            return responseData['message'];
+          }
+          
+          // Check for 'error' field and provide custom messages
+          if (responseData['error'] != null) {
+            final errorCode = responseData['error'];
+            
+            if (errorCode == 'invalid_full_name') {
+              return 'الاسم الكامل غير صحيح. يجب أن يحتوي على اسم أول واسم أخير\nمثال: أحمد محمد';
+            } else if (errorCode == 'email_exists' || errorCode == 'username_exists') {
+              return 'البريد الإلكتروني أو اسم المستخدم مستخدم بالفعل';
+            } else if (errorCode == 'invalid_email') {
+              return 'البريد الإلكتروني غير صحيح';
+            } else if (errorCode == 'weak_password') {
+              return 'كلمة المرور ضعيفة. يجب أن تكون 6 أحرف على الأقل';
+            }
+            
+            return errorCode.toString();
+          }
         }
-        return 'خطأ في الخادم: ${error.response?.statusCode}';
+        
+        // Handle specific status codes
+        if (statusCode == 401) {
+          return 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+        } else if (statusCode == 400) {
+          return 'بيانات غير صحيحة. تحقق من المعلومات المدخلة';
+        } else if (statusCode == 409) {
+          return 'البريد الإلكتروني أو اسم المستخدم مستخدم بالفعل';
+        } else if (statusCode == 422) {
+          return 'البيانات المدخلة غير صالحة';
+        } else if (statusCode == 500) {
+          return 'خطأ في الخادم. حاول مرة أخرى لاحقاً';
+        }
+        return 'خطأ في الخادم: $statusCode';
       case DioExceptionType.cancel:
         return 'تم إلغاء الطلب';
       case DioExceptionType.connectionError:
-        return 'لا يوجد اتصال بالإنترنت';
+        return 'لا يوجد اتصال بالإنترنت. تحقق من اتصالك';
       default:
-        return 'حدث خطأ غير متوقع';
+        return 'حدث خطأ غير متوقع. حاول مرة أخرى';
     }
   }
 }

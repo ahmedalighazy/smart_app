@@ -23,7 +23,7 @@ class CategoryPreview extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: category['color'].withOpacity(0.3),
+              color: category['color'].withValues(alpha: 0.3),
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),
@@ -111,9 +111,10 @@ class CategoryPreview extends StatelessWidget {
                               color: category['color'].withValues(alpha: 0.1),
                               child: Center(
                                 child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes != null
+                                  value:
+                                      loadingProgress.expectedTotalBytes != null
                                       ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
+                                            loadingProgress.expectedTotalBytes!
                                       : null,
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -127,10 +128,7 @@ class CategoryPreview extends StatelessWidget {
                 ),
               )
             else
-              Text(
-                category['emoji'],
-                style: const TextStyle(fontSize: 30),
-              ),
+              Text(category['emoji'], style: const TextStyle(fontSize: 30)),
             const SizedBox(width: 10),
             Text(
               'أمثلة من ${category['name']}',
@@ -143,11 +141,7 @@ class CategoryPreview extends StatelessWidget {
             ),
           ],
         ),
-        Icon(
-          Icons.arrow_back_ios,
-          color: category['color'],
-          size: 20,
-        ),
+        Icon(Icons.arrow_back_ios, color: category['color'], size: 20),
       ],
     );
   }
@@ -161,10 +155,10 @@ class CategoryPreview extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 5),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: category['color'].withOpacity(0.1),
+              color: category['color'].withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: category['color'].withOpacity(0.3),
+                color: category['color'].withValues(alpha: 0.3),
                 width: 1.5,
               ),
             ),

@@ -8,10 +8,12 @@ import 'dart:developer' as developer;
 import '../models/user_model.dart';
 
 class FoodVisionService {
-  final String apiKey = 'AIzaSyCOTsqI0YTCuH_aAqA_d1FUUtAXpYd0q6U';
+  final String apiKey = 'AIzaSyDUt3x9GaB8xiEMt9-FO_qk7PJxSnIZte4';
 
   static DateTime? _lastRequestTime;
-  static const Duration _minDelayBetweenRequests = Duration(seconds: 2); // ثانيتين فقط!
+  static const Duration _minDelayBetweenRequests = Duration(
+    seconds: 2,
+  ); // ثانيتين فقط!
 
   Future<void> _waitIfNeeded() async {
     if (_lastRequestTime != null) {
@@ -19,19 +21,29 @@ class FoodVisionService {
 
       if (timeSinceLastRequest < _minDelayBetweenRequests) {
         final waitTime = _minDelayBetweenRequests - timeSinceLastRequest;
-        developer.log('⏳ انتظار ${waitTime.inSeconds} ثانية...',
-            name: 'FoodVisionService');
+        developer.log(
+          '⏳ انتظار ${waitTime.inSeconds} ثانية...',
+          name: 'FoodVisionService',
+        );
         await Future.delayed(waitTime);
       }
     }
     _lastRequestTime = DateTime.now();
   }
 
-  Future<String> getAIRecommendations(UserModel user, CalculationResult result) async {
-    developer.log('🤖 Starting AI recommendations with Gemini', name: 'FoodVisionService');
+  Future<String> getAIRecommendations(
+    UserModel user,
+    CalculationResult result,
+  ) async {
+    developer.log(
+      '🤖 Starting AI recommendations with Gemini',
+      name: 'FoodVisionService',
+    );
 
     // التحقق من المفتاح
-    if (apiKey.isEmpty || apiKey == 'YOUR_GEMINI_API_KEY_HERE' || apiKey == 'ضع-مفتاحك-هنا') {
+    if (apiKey.isEmpty ||
+        apiKey == 'YOUR_GEMINI_API_KEY_HERE' ||
+        apiKey == 'ضع-مفتاحك-هنا') {
       return '''
 ⚠️ مفتاح Gemini API غير مُعرّف
 
@@ -48,7 +60,8 @@ class FoodVisionService {
     // الانتظار إذا لزم الأمر
     await _waitIfNeeded();
 
-    final prompt = '''
+    final prompt =
+        '''
 أنت أخصائي تغذية خبير. قدم توصيات غذائية مخصصة للشخص التالي:
 
 📊 البيانات:
@@ -76,39 +89,48 @@ class FoodVisionService {
 
     while (retryCount < maxRetries) {
       try {
-        developer.log('🚀 Sending request to Gemini (attempt ${retryCount + 1}/$maxRetries)',
-            name: 'FoodVisionService');
-
-        final response = await http.post(
-          Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey'),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({
-            'contents': [
-              {
-                'parts': [
-                  {'text': prompt}
-                ]
-              }
-            ],
-            'generationConfig': {
-              'temperature': 0.7,
-              'maxOutputTokens': 8000, // زيادة من 2000 إلى 8000
-            }
-          }),
-        ).timeout(
-          const Duration(seconds: 30),
-          onTimeout: () {
-            throw Exception('انتهت مهلة الاتصال');
-          },
+        developer.log(
+          '🚀 Sending request to Gemini (attempt ${retryCount + 1}/$maxRetries)',
+          name: 'FoodVisionService',
         );
 
-        developer.log('📥 Response status: ${response.statusCode}',
-            name: 'FoodVisionService');
+        final response = await http
+            .post(
+              Uri.parse(
+                'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey',
+              ),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode({
+                'contents': [
+                  {
+                    'parts': [
+                      {'text': prompt},
+                    ],
+                  },
+                ],
+                'generationConfig': {
+                  'temperature': 0.7,
+                  'maxOutputTokens': 8000, // زيادة من 2000 إلى 8000
+                },
+              }),
+            )
+            .timeout(
+              const Duration(seconds: 30),
+              onTimeout: () {
+                throw Exception('انتهت مهلة الاتصال');
+              },
+            );
+
+        developer.log(
+          '📥 Response status: ${response.statusCode}',
+          name: 'FoodVisionService',
+        );
 
         if (response.statusCode == 200) {
-          developer.log('✅ Successful response from Gemini', name: 'FoodVisionService');
+          developer.log(
+            '✅ Successful response from Gemini',
+            name: 'FoodVisionService',
+          );
 
           final data = jsonDecode(utf8.decode(response.bodyBytes));
 
@@ -116,20 +138,26 @@ class FoodVisionService {
             return 'خطأ: لم يتم الحصول على نتائج من Gemini';
           }
 
-          final recommendations = data['candidates'][0]['content']['parts'][0]['text'];
-          developer.log('✅ Recommendations received: ${recommendations.length} chars',
-              name: 'FoodVisionService');
+          final recommendations =
+              data['candidates'][0]['content']['parts'][0]['text'];
+          developer.log(
+            '✅ Recommendations received: ${recommendations.length} chars',
+            name: 'FoodVisionService',
+          );
 
           return recommendations;
-
         } else if (response.statusCode == 429) {
           retryCount++;
-          developer.log('⏱️ Rate limit hit (attempt $retryCount/$maxRetries)',
-              name: 'FoodVisionService');
+          developer.log(
+            '⏱️ Rate limit hit (attempt $retryCount/$maxRetries)',
+            name: 'FoodVisionService',
+          );
 
           if (retryCount < maxRetries) {
-            developer.log('⏳ سننتظر 10 ثواني ونحاول مرة أخرى...',
-                name: 'FoodVisionService');
+            developer.log(
+              '⏳ سننتظر 10 ثواني ونحاول مرة أخرى...',
+              name: 'FoodVisionService',
+            );
             await Future.delayed(const Duration(seconds: 10));
             continue;
           } else {
@@ -142,7 +170,38 @@ class FoodVisionService {
 💡 Gemini مجاني ويسمح بـ 60 طلب/دقيقة
             ''';
           }
+        } else if (response.statusCode == 503) {
+          retryCount++;
+          // Exponential backoff: 5s, 15s, 30s
+          final waitTime = retryCount == 1 ? 5 : (retryCount == 2 ? 15 : 30);
 
+          developer.log(
+            '🔧 Service unavailable (503) - attempt $retryCount/$maxRetries',
+            name: 'FoodVisionService',
+          );
+
+          if (retryCount < maxRetries) {
+            developer.log(
+              '⏳ الخدمة مشغولة، سننتظر $waitTime ثانية ونحاول مرة أخرى...',
+              name: 'FoodVisionService',
+            );
+            await Future.delayed(Duration(seconds: waitTime));
+            continue;
+          } else {
+            return '''
+🔧 الخدمة غير متاحة مؤقتاً (503)
+
+📝 الأسباب المحتملة:
+• خوادم Gemini مشغولة حالياً
+• صيانة مؤقتة على الخدمة
+• ضغط كبير على الخوادم
+
+✅ الحل:
+انتظر دقيقة واحدة وحاول مرة أخرى
+
+💡 هذا خطأ مؤقت من Google وسيتم حله تلقائياً
+            ''';
+          }
         } else if (response.statusCode == 400) {
           final errorData = jsonDecode(response.body);
           return 'خطأ في الطلب: ${errorData['error']['message'] ?? 'غير معروف'}';
@@ -155,20 +214,28 @@ class FoodVisionService {
 2. فعّل Gemini API من: https://console.cloud.google.com/apis/library/generativelanguage.googleapis.com
           ''';
         } else {
-          developer.log('❌ API error: ${response.statusCode}', name: 'FoodVisionService');
+          developer.log(
+            '❌ API error: ${response.statusCode}',
+            name: 'FoodVisionService',
+          );
           return 'خطأ في الحصول على التوصيات: ${response.statusCode}';
         }
-
       } on SocketException catch (e) {
         developer.log('❌ Network error', name: 'FoodVisionService', error: e);
         return 'خطأ في الاتصال بالإنترنت. تحقق من اتصالك';
       } catch (e) {
-        developer.log('❌ Unexpected error', name: 'FoodVisionService', error: e);
+        developer.log(
+          '❌ Unexpected error',
+          name: 'FoodVisionService',
+          error: e,
+        );
 
         if (retryCount < maxRetries - 1) {
           retryCount++;
-          developer.log('🔄 Retrying after error (attempt $retryCount/$maxRetries)',
-              name: 'FoodVisionService');
+          developer.log(
+            '🔄 Retrying after error (attempt $retryCount/$maxRetries)',
+            name: 'FoodVisionService',
+          );
           await Future.delayed(const Duration(seconds: 5));
           continue;
         }
@@ -182,7 +249,10 @@ class FoodVisionService {
 
   // تحليل صورة الطعام باستخدام Gemini Vision
   Future<FoodAnalysisResult> analyzeFood(File imageFile) async {
-    developer.log('📸 Starting food analysis with Gemini Vision', name: 'FoodVisionService');
+    developer.log(
+      '📸 Starting food analysis with Gemini Vision',
+      name: 'FoodVisionService',
+    );
 
     // الانتظار إذا لزم الأمر
     await _waitIfNeeded();
@@ -195,17 +265,18 @@ class FoodVisionService {
       final bytes = await imageFile.readAsBytes();
       final base64Image = base64Encode(bytes);
 
-      final response = await http.post(
-        Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'contents': [
-            {
-              'parts': [
+      final response = await http
+          .post(
+            Uri.parse(
+              'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey',
+            ),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'contents': [
                 {
-                  'text': '''
+                  'parts': [
+                    {
+                      'text': '''
 أنت خبير تغذية. حلل هذه الصورة وقدم المعلومات بهذا التنسيق بالضبط:
 
 FOOD_NAME: [اسم الطعام بالعربية]
@@ -219,30 +290,36 @@ FIBER: [رقم فقط]
 HEALTH_RATING: [ممتاز أو جيد أو متوسط أو ضعيف]
 TIPS: [نصيحة واحدة مختصرة]
 DETAILED_ANALYSIS: [تحليل تفصيلي]
-                  '''
+                  ''',
+                    },
+                    {
+                      'inline_data': {
+                        'mime_type': 'image/jpeg',
+                        'data': base64Image,
+                      },
+                    },
+                  ],
                 },
-                {
-                  'inline_data': {
-                    'mime_type': 'image/jpeg',
-                    'data': base64Image
-                  }
-                }
-              ]
-            }
-          ],
-          'generationConfig': {
-            'temperature': 0.4,
-            'maxOutputTokens': 4000, // زيادة من 1000 إلى 4000
-          }
-        }),
-      ).timeout(const Duration(seconds: 30));
+              ],
+              'generationConfig': {
+                'temperature': 0.4,
+                'maxOutputTokens': 4000, // زيادة من 1000 إلى 4000
+              },
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(utf8.decode(response.bodyBytes));
-        final analysisText = data['candidates'][0]['content']['parts'][0]['text'];
+        final analysisText =
+            data['candidates'][0]['content']['parts'][0]['text'];
         return _parseAnalysis(analysisText);
       } else if (response.statusCode == 429) {
         throw Exception('تم تجاوز حد الطلبات. انتظر 10 ثواني وحاول مرة أخرى');
+      } else if (response.statusCode == 503) {
+        throw Exception(
+          'الخدمة غير متاحة مؤقتاً (503). انتظر دقيقة وحاول مرة أخرى',
+        );
       } else if (response.statusCode == 403) {
         throw Exception('مفتاح API غير صحيح أو غير مفعّل');
       } else {
@@ -292,12 +369,18 @@ DETAILED_ANALYSIS: [تحليل تفصيلي]
 
   String _getActivityLevelArabic(String level) {
     switch (level) {
-      case 'sedentary': return 'قليل جداً';
-      case 'light': return 'خفيف';
-      case 'moderate': return 'معتدل';
-      case 'active': return 'نشط';
-      case 'very_active': return 'نشط جداً';
-      default: return 'معتدل';
+      case 'sedentary':
+        return 'قليل جداً';
+      case 'light':
+        return 'خفيف';
+      case 'moderate':
+        return 'معتدل';
+      case 'active':
+        return 'نشط';
+      case 'very_active':
+        return 'نشط جداً';
+      default:
+        return 'معتدل';
     }
   }
 }

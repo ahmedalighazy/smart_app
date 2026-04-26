@@ -21,7 +21,9 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
 
   List<MealModel> _getFilteredMeals(List<MealModel> allMeals) {
     if (_selectedMealType == 'all') return allMeals;
-    return allMeals.where((meal) => meal.mealType == _selectedMealType).toList();
+    return allMeals
+        .where((meal) => meal.mealType == _selectedMealType)
+        .toList();
   }
 
   @override
@@ -31,7 +33,9 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
         final isDark = state.isDarkMode;
 
         return Scaffold(
-          backgroundColor: isDark ? AppTheme.darkBackground : const Color(0xFFF8F9FA),
+          backgroundColor: isDark
+              ? AppTheme.darkBackground
+              : const Color(0xFFF8F9FA),
           body: Column(
             children: [
               _buildHeader(context, isDark),
@@ -55,7 +59,10 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
                             padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
                             itemCount: filteredMeals.length,
                             itemBuilder: (context, index) {
-                              return _buildMealCard(filteredMeals[index], isDark);
+                              return _buildMealCard(
+                                filteredMeals[index],
+                                isDark,
+                              );
                             },
                           ),
                         ),
@@ -114,7 +121,11 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
               color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(Icons.restaurant_menu, color: Colors.white, size: 26),
+            child: const Icon(
+              Icons.restaurant_menu,
+              color: Colors.white,
+              size: 26,
+            ),
           ),
         ],
       ),
@@ -143,7 +154,8 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
           final isSelected = _selectedMealType == type['id'];
 
           return GestureDetector(
-            onTap: () => setState(() => _selectedMealType = type['id'] as String),
+            onTap: () =>
+                setState(() => _selectedMealType = type['id'] as String),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               margin: const EdgeInsets.only(left: 10),
@@ -153,28 +165,36 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
                     ? AppColors.primary
                     : (isDark ? AppTheme.darkCard : Colors.white),
                 borderRadius: BorderRadius.circular(25),
-                boxShadow: isSelected ? [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ] : null,
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ]
+                    : null,
               ),
               child: Row(
                 children: [
                   Icon(
                     type['icon'] as IconData,
                     size: 18,
-                    color: isSelected ? Colors.white : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                    color: isSelected
+                        ? Colors.white
+                        : (isDark ? Colors.grey[400] : Colors.grey[600]),
                   ),
                   const SizedBox(width: 6),
                   Text(
                     type['name'] as String,
                     style: TextStyle(
                       fontSize: 13,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      color: isSelected ? Colors.white : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: isSelected
+                          ? Colors.white
+                          : (isDark ? Colors.grey[400] : Colors.grey[600]),
                     ),
                   ),
                 ],
@@ -206,10 +226,30 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatItem('🔥', stats['calories']!.toStringAsFixed(0), 'سعرة', AppColors.calories),
-          _buildStatItem('💪', '${stats['protein']!.toStringAsFixed(0)}g', 'بروتين', AppColors.protein),
-          _buildStatItem('🌾', '${stats['carbs']!.toStringAsFixed(0)}g', 'كربو', AppColors.carbs),
-          _buildStatItem('💧', '${stats['fat']!.toStringAsFixed(0)}g', 'دهون', AppColors.fats),
+          _buildStatItem(
+            '🔥',
+            stats['calories']!.toStringAsFixed(0),
+            'سعرة',
+            AppColors.calories,
+          ),
+          _buildStatItem(
+            '💪',
+            '${stats['protein']!.toStringAsFixed(0)}g',
+            'بروتين',
+            AppColors.protein,
+          ),
+          _buildStatItem(
+            '🌾',
+            '${stats['carbs']!.toStringAsFixed(0)}g',
+            'كربو',
+            AppColors.carbs,
+          ),
+          _buildStatItem(
+            '💧',
+            '${stats['fat']!.toStringAsFixed(0)}g',
+            'دهون',
+            AppColors.fats,
+          ),
         ],
       ),
     );
@@ -228,10 +268,7 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
             color: color,
           ),
         ),
-        Text(
-          label,
-          style: TextStyle(fontSize: 10, color: Colors.grey[500]),
-        ),
+        Text(label, style: TextStyle(fontSize: 10, color: Colors.grey[500])),
       ],
     );
   }
@@ -256,10 +293,15 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
         HiveService.deleteMeal(meal.id);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('تم حذف ${meal.name}', textDirection: TextDirection.rtl),
+            content: Text(
+              'تم حذف ${meal.name}',
+              textDirection: TextDirection.rtl,
+            ),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       },
@@ -291,7 +333,10 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
-                child: Text(meal.categoryEmoji, style: const TextStyle(fontSize: 26)),
+                child: Text(
+                  meal.categoryEmoji,
+                  style: const TextStyle(fontSize: 26),
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -316,9 +361,14 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
-                          color: _getMealTypeColor(meal.mealType).withValues(alpha: 0.15),
+                          color: _getMealTypeColor(
+                            meal.mealType,
+                          ).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -336,9 +386,17 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
                   Row(
                     textDirection: TextDirection.rtl,
                     children: [
-                      _buildNutrientChip('🔥', meal.calories, AppColors.calories),
+                      _buildNutrientChip(
+                        '🔥',
+                        meal.calories,
+                        AppColors.calories,
+                      ),
                       const SizedBox(width: 8),
-                      _buildNutrientChip('💪', '${meal.protein}g', AppColors.protein),
+                      _buildNutrientChip(
+                        '💪',
+                        '${meal.protein}g',
+                        AppColors.protein,
+                      ),
                     ],
                   ),
                 ],
@@ -364,7 +422,11 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
           const SizedBox(width: 4),
           Text(
             value,
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: color),
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
           ),
         ],
       ),
@@ -405,11 +467,16 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
           ElevatedButton.icon(
             onPressed: () => _showAddMealSheet(context),
             icon: const Icon(Icons.add, color: Colors.white),
-            label: Text(context.tr('add_meal'), style: const TextStyle(color: Colors.white)),
+            label: Text(
+              context.tr('add_meal'),
+              style: const TextStyle(color: Colors.white),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
         ],
@@ -424,36 +491,69 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
       icon: const Icon(Icons.add_rounded, color: Colors.white),
       label: Text(
         context.tr('add_meal'),
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
 
   String _getFormattedDate() {
     final now = DateTime.now();
-    final days = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-    final months = ['يناير', 'فبراير', 'مارس', 'إبريل', 'مايو', 'يونيو',
-      'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    final days = [
+      'الأحد',
+      'الاثنين',
+      'الثلاثاء',
+      'الأربعاء',
+      'الخميس',
+      'الجمعة',
+      'السبت',
+    ];
+    final months = [
+      'يناير',
+      'فبراير',
+      'مارس',
+      'إبريل',
+      'مايو',
+      'يونيو',
+      'يوليو',
+      'أغسطس',
+      'سبتمبر',
+      'أكتوبر',
+      'نوفمبر',
+      'ديسمبر',
+    ];
     return '${days[now.weekday % 7]}، ${now.day} ${months[now.month - 1]}';
   }
 
   String _getMealTypeName(String type) {
     switch (type) {
-      case 'breakfast': return 'فطور';
-      case 'lunch': return 'غداء';
-      case 'dinner': return 'عشاء';
-      case 'snack': return 'خفيفة';
-      default: return 'أخرى';
+      case 'breakfast':
+        return 'فطور';
+      case 'lunch':
+        return 'غداء';
+      case 'dinner':
+        return 'عشاء';
+      case 'snack':
+        return 'خفيفة';
+      default:
+        return 'أخرى';
     }
   }
 
   Color _getMealTypeColor(String type) {
     switch (type) {
-      case 'breakfast': return Colors.orange;
-      case 'lunch': return Colors.green;
-      case 'dinner': return Colors.blue;
-      case 'snack': return Colors.purple;
-      default: return Colors.grey;
+      case 'breakfast':
+        return Colors.orange;
+      case 'lunch':
+        return Colors.green;
+      case 'dinner':
+        return Colors.blue;
+      case 'snack':
+        return Colors.purple;
+      default:
+        return Colors.grey;
     }
   }
 
@@ -503,7 +603,10 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
                             color: AppColors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(Icons.add_circle, color: AppColors.primary),
+                          child: const Icon(
+                            Icons.add_circle,
+                            color: AppColors.primary,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Text(
@@ -524,7 +627,11 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
                           color: Colors.grey.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.close, size: 18, color: isDark ? Colors.white : Colors.grey[700]),
+                        child: Icon(
+                          Icons.close,
+                          size: 18,
+                          color: isDark ? Colors.white : Colors.grey[700],
+                        ),
                       ),
                     ),
                   ],
@@ -581,12 +688,17 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        _buildFoodList(selectedCategory!, selectedFoodItem, isDark, (food, item) {
-                          setSheetState(() {
-                            selectedFoodItem = item;
-                            selectedFood = food;
-                          });
-                        }),
+                        _buildFoodList(
+                          selectedCategory!,
+                          selectedFoodItem,
+                          isDark,
+                          (food, item) {
+                            setSheetState(() {
+                              selectedFoodItem = item;
+                              selectedFood = food;
+                            });
+                          },
+                        ),
                         const SizedBox(height: 24),
                       ],
 
@@ -601,18 +713,30 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
                         width: double.infinity,
                         height: 54,
                         child: ElevatedButton(
-                          onPressed: selectedFood == null ? null : () {
-                            _addMeal(selectedCategory!, selectedFood!, selectedMealType);
-                            Navigator.pop(context);
-                          },
+                          onPressed: selectedFood == null
+                              ? null
+                              : () {
+                                  _addMeal(
+                                    selectedCategory!,
+                                    selectedFood!,
+                                    selectedMealType,
+                                  );
+                                  Navigator.pop(context);
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             disabledBackgroundColor: Colors.grey[300],
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                           ),
                           child: Text(
                             this.context.tr('save'),
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -628,7 +752,11 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
     );
   }
 
-  Widget _buildMealTypeSelector(String selected, bool isDark, Function(String) onSelect) {
+  Widget _buildMealTypeSelector(
+    String selected,
+    bool isDark,
+    Function(String) onSelect,
+  ) {
     final types = [
       {'id': 'breakfast', 'name': context.tr('breakfast'), 'emoji': '🌅'},
       {'id': 'lunch', 'name': context.tr('lunch'), 'emoji': '☀️'},
@@ -647,20 +775,31 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 4),
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : (isDark ? AppTheme.darkSurface : Colors.grey[100]),
+                color: isSelected
+                    ? AppColors.primary
+                    : (isDark ? AppTheme.darkSurface : Colors.grey[100]),
                 borderRadius: BorderRadius.circular(12),
-                border: isSelected ? null : Border.all(color: Colors.grey.withValues(alpha: 0.3)),
+                border: isSelected
+                    ? null
+                    : Border.all(color: Colors.grey.withValues(alpha: 0.3)),
               ),
               child: Column(
                 children: [
-                  Text(type['emoji'] as String, style: const TextStyle(fontSize: 20)),
+                  Text(
+                    type['emoji'] as String,
+                    style: const TextStyle(fontSize: 20),
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     type['name'] as String,
                     style: TextStyle(
                       fontSize: 11,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      color: isSelected ? Colors.white : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: isSelected
+                          ? Colors.white
+                          : (isDark ? Colors.grey[400] : Colors.grey[600]),
                     ),
                   ),
                 ],
@@ -672,7 +811,11 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
     );
   }
 
-  Widget _buildCategoryGrid(String? selected, bool isDark, Function(String) onSelect) {
+  Widget _buildCategoryGrid(
+    String? selected,
+    bool isDark,
+    Function(String) onSelect,
+  ) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -693,7 +836,9 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
-              color: isSelected ? color.withValues(alpha: 0.2) : (isDark ? AppTheme.darkSurface : Colors.grey[50]),
+              color: isSelected
+                  ? color.withValues(alpha: 0.2)
+                  : (isDark ? AppTheme.darkSurface : Colors.grey[50]),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isSelected ? color : Colors.transparent,
@@ -703,14 +848,21 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(cat['emoji'] as String, style: const TextStyle(fontSize: 24)),
+                Text(
+                  cat['emoji'] as String,
+                  style: const TextStyle(fontSize: 24),
+                ),
                 const SizedBox(height: 4),
                 Text(
                   cat['name'] as String,
                   style: TextStyle(
                     fontSize: 10,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected ? color : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    color: isSelected
+                        ? color
+                        : (isDark ? Colors.grey[400] : Colors.grey[600]),
                   ),
                   textAlign: TextAlign.center,
                   maxLines: 1,
@@ -724,9 +876,15 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
     );
   }
 
-  Widget _buildFoodList(String categoryName, String? selected, bool isDark, 
-      Function(Map<String, dynamic>, String) onSelect) {
-    final category = foodCategories.firstWhere((c) => c['name'] == categoryName);
+  Widget _buildFoodList(
+    String categoryName,
+    String? selected,
+    bool isDark,
+    Function(Map<String, dynamic>, String) onSelect,
+  ) {
+    final category = foodCategories.firstWhere(
+      (c) => c['name'] == categoryName,
+    );
     final items = category['items'] as List;
 
     return Container(
@@ -747,8 +905,8 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
               margin: const EdgeInsets.only(left: 10),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isSelected 
-                    ? AppColors.primary.withValues(alpha: 0.15) 
+                color: isSelected
+                    ? AppColors.primary.withValues(alpha: 0.15)
                     : (isDark ? AppTheme.darkSurface : Colors.grey[50]),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
@@ -760,16 +918,27 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (isSelected)
-                    const Icon(Icons.check_circle, color: AppColors.primary, size: 24)
+                    const Icon(
+                      Icons.check_circle,
+                      color: AppColors.primary,
+                      size: 24,
+                    )
                   else
-                    Text(category['emoji'] as String, style: const TextStyle(fontSize: 28)),
+                    Text(
+                      category['emoji'] as String,
+                      style: const TextStyle(fontSize: 28),
+                    ),
                   const SizedBox(height: 8),
                   Text(
                     item['name'] as String,
                     style: TextStyle(
                       fontSize: 13,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      color: isSelected ? AppColors.primary : (isDark ? Colors.white : AppColors.textDark),
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: isSelected
+                          ? AppColors.primary
+                          : (isDark ? Colors.white : AppColors.textDark),
                     ),
                     textAlign: TextAlign.center,
                     maxLines: 2,
@@ -835,14 +1004,23 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
       children: [
         Text(emoji, style: const TextStyle(fontSize: 18)),
         const SizedBox(height: 2),
-        Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        ),
         Text(label, style: TextStyle(fontSize: 10, color: Colors.grey[600])),
       ],
     );
   }
 
-  void _addMeal(String categoryName, Map<String, dynamic> food, String mealType) {
-    final category = foodCategories.firstWhere((c) => c['name'] == categoryName);
+  void _addMeal(
+    String categoryName,
+    Map<String, dynamic> food,
+    String mealType,
+  ) {
+    final category = foodCategories.firstWhere(
+      (c) => c['name'] == categoryName,
+    );
 
     final meal = MealModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -853,7 +1031,7 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
       fat: food['fat'] as String,
       categoryName: category['name'] as String,
       categoryEmoji: category['emoji'] as String,
-      categoryColorValue: (category['color'] as Color).value,
+      categoryColorValue: (category['color'] as Color).toARGB32(),
       addedAt: DateTime.now(),
       mealType: mealType,
       imageUrl: category['imageUrl'] as String?,
@@ -870,7 +1048,10 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('تمت إضافة ${meal.name} ✓', textDirection: TextDirection.rtl),
+        content: Text(
+          'تمت إضافة ${meal.name} ✓',
+          textDirection: TextDirection.rtl,
+        ),
         backgroundColor: AppColors.success,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

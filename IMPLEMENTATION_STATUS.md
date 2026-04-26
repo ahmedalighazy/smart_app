@@ -153,6 +153,7 @@
 2. **Type Safety**: Fixed `Box<Map<dynamic, dynamic>>` to `Box<String>` with proper JSON serialization
 3. **Timer Management**: Proper cleanup of auto-notification timer on screen dispose
 4. **Notification Persistence**: Notifications properly saved to Hive database with JSON serialization
+5. **503 Error Handling**: Added comprehensive handling for Gemini API 503 errors with exponential backoff retry strategy (5s → 15s → 30s)
 
 ## 📝 Notes
 

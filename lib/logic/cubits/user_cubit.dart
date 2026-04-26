@@ -118,21 +118,63 @@ class UserCubit extends Cubit<UserState> {
   // Register method
   Future<void> register(String name, String email, String password) async {
     try {
+      print('🔵 Register attempt in UserCubit');
+      print('📧 Email: $email');
+      print('👤 Name: $name');
+      
+      // Validate inputs
+      if (name.trim().isEmpty || email.trim().isEmpty || password.isEmpty) {
+        emit(UserError('جميع الحقول مطلوبة'));
+        return;
+      }
+      
+      // Check if full name contains first and last name (must have space)
+      final nameTrimmed = name.trim();
+      if (!nameTrimmed.contains(' ')) {
+        emit(UserError('الاسم الكامل يجب أن يحتوي على اسم أول واسم أخير\nمثال: أحمد محمد'));
+        return;
+      }
+      
+      if (nameTrimmed.length < 5) {
+        emit(UserError('الاسم الكامل يجب أن يكون 5 أحرف على الأقل'));
+        return;
+      }
+      
+      if (!email.contains('@') || !email.contains('.')) {
+        emit(UserError('البريد الإلكتروني غير صحيح'));
+        return;
+      }
+      
+      if (password.length < 6) {
+        emit(UserError('كلمة المرور يجب أن تكون 6 أحرف على الأقل'));
+        return;
+      }
+
       emit(UserLoading());
 
+      // Generate username from email
+      final username = email.split('@')[0].toLowerCase().replaceAll(RegExp(r'[^a-z0-9_]'), '_');
+      
+      print('🚀 Calling AuthService.register...');
       final result = await AuthService.register(
-        username: email.split('@')[0],
-        email: email,
+        username: username,
+        email: email.trim(),
         password: password,
-        fullName: name,
+        fullName: nameTrimmed,
       );
 
+      print('📥 Result from AuthService: $result');
+
       if (result['success'] == true) {
+        print('✅ Registration successful');
         emit(UserAuthenticated(result['data']));
       } else {
+        print('❌ Registration failed: ${result['message']}');
         emit(UserError(result['message'] ?? 'فشل التسجيل'));
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('❌ Exception in register: $e');
+      print('Stack trace: $stackTrace');
       emit(UserError('خطأ في التسجيل: $e'));
     }
   }

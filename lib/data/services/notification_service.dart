@@ -1,5 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'notification_history_service.dart';
 
 class NotificationService {
@@ -21,10 +22,10 @@ class NotificationService {
 
     const DarwinInitializationSettings iosSettings =
         DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+          requestAlertPermission: true,
+          requestBadgePermission: true,
+          requestSoundPermission: true,
+        );
 
     const InitializationSettings initSettings = InitializationSettings(
       android: androidSettings,
@@ -38,7 +39,8 @@ class NotificationService {
     // Request permissions for Android 13+
     await _notificationsPlugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.requestNotificationsPermission();
   }
 
@@ -47,14 +49,29 @@ class NotificationService {
     required String calories,
     required String protein,
   }) async {
+    // التحقق من حالة كتم الإشعارات
+    final prefs = await SharedPreferences.getInstance();
+    final isMuted = prefs.getBool('notificationsMuted') ?? false;
+
+    if (isMuted) {
+      // حفظ في السجل فقط بدون عرض الإشعار
+      await NotificationHistoryService.addNotification(
+        title: 'تم إضافة وجبة جديدة',
+        body: '$mealName - $calories سعرة حرارية',
+        type: 'meal',
+        data: {'mealName': mealName, 'calories': calories, 'protein': protein},
+      );
+      return;
+    }
+
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
-      'meal_channel',
-      'وجبات',
-      channelDescription: 'إشعارات الوجبات المضافة',
-      importance: Importance.high,
-      priority: Priority.high,
-    );
+          'meal_channel',
+          'وجبات',
+          channelDescription: 'إشعارات الوجبات المضافة',
+          importance: Importance.high,
+          priority: Priority.high,
+        );
 
     const DarwinNotificationDetails iosDetails = DarwinNotificationDetails();
 
@@ -76,23 +93,33 @@ class NotificationService {
       title: 'تم إضافة وجبة جديدة',
       body: '$mealName - $calories سعرة حرارية',
       type: 'meal',
-      data: {
-        'mealName': mealName,
-        'calories': calories,
-        'protein': protein,
-      },
+      data: {'mealName': mealName, 'calories': calories, 'protein': protein},
     );
   }
 
   Future<void> scheduleDailyTip(String tip) async {
+    // التحقق من حالة كتم الإشعارات
+    final prefs = await SharedPreferences.getInstance();
+    final isMuted = prefs.getBool('notificationsMuted') ?? false;
+
+    if (isMuted) {
+      // حفظ في السجل فقط بدون عرض الإشعار
+      await NotificationHistoryService.addNotification(
+        title: 'نصيحة اليوم',
+        body: tip,
+        type: 'tip',
+      );
+      return;
+    }
+
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
-      'tips_channel',
-      'نصائح',
-      channelDescription: 'نصائح التغذية والرياضة',
-      importance: Importance.high,
-      priority: Priority.high,
-    );
+          'tips_channel',
+          'نصائح',
+          channelDescription: 'نصائح التغذية والرياضة',
+          importance: Importance.high,
+          priority: Priority.high,
+        );
 
     const DarwinNotificationDetails iosDetails = DarwinNotificationDetails();
 
@@ -118,4 +145,3 @@ class NotificationService {
     );
   }
 }
- 
