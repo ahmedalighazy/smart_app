@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 final List<Map<String, dynamic>> completeMealsCategories = [
   {
     'emoji': '🍽️',
-    'name': 'وجبات كاملة',
+    'name': 'light_meals',
     'color': Colors.deepOrange,
     'imageUrl': null,
     'isLocalImage': false,
@@ -540,7 +540,7 @@ final List<Map<String, dynamic>> completeMealsCategories = [
   },
   {
     'emoji': '🥤',
-    'name': 'مشروبات',
+    'name': 'beverages',
     'color': Colors.cyan,
     'imageUrl': null,
     'isLocalImage': false,
@@ -876,7 +876,7 @@ final List<Map<String, dynamic>> completeMealsCategories = [
   },
   {
     'emoji': '🥜',
-    'name': 'مكسرات وبذور',
+    'name': 'nuts_sweets',
     'color': Colors.amber,
     'imageUrl': null,
     'isLocalImage': false,

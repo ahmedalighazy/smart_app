@@ -23,6 +23,71 @@ class _HomeContentScreenState extends State<HomeContentScreen> {
   List<Map<String, dynamic>> _searchResults = [];
   bool _isSearching = false;
 
+  // خريطة ترجمة الأطعمة الشائعة
+  final Map<String, Map<String, String>> _foodTranslations = {
+    'ar_to_en': {
+      'قرنبيط': 'Cauliflower',
+      'طماطم': 'Tomato',
+      'خيار': 'Cucumber',
+      'فلفل أحمر': 'Red Pepper',
+      'فلفل أخضر': 'Green Pepper',
+      'جزر': 'Carrot',
+      'بصل': 'Onion',
+      'بطاطس': 'Potato',
+      'خس': 'Lettuce',
+      'سبانخ': 'Spinach',
+      'بروكلي': 'Broccoli',
+      'كوسا': 'Zucchini',
+      'باذنجان': 'Eggplant',
+      'فجل': 'Radish',
+      'ملفوف': 'Cabbage',
+      'كرنب': 'Cabbage',
+      'جرجير': 'Arugula',
+      'بقدونس': 'Parsley',
+      'نعناع': 'Mint',
+      'كزبرة': 'Cilantro',
+      'فاصوليا خضراء': 'Green Beans',
+      'لوبيا': 'Black-eyed Peas',
+      'بازلاء': 'Peas',
+    },
+    'en_to_ar': {
+      'Cauliflower': 'قرنبيط',
+      'Tomato': 'طماطم',
+      'Cucumber': 'خيار',
+      'Red Pepper': 'فلفل أحمر',
+      'Green Pepper': 'فلفل أخضر',
+      'Carrot': 'جزر',
+      'Onion': 'بصل',
+      'Potato': 'بطاطس',
+      'Lettuce': 'خس',
+      'Spinach': 'سبانخ',
+      'Broccoli': 'بروكلي',
+      'Zucchini': 'كوسا',
+      'Eggplant': 'باذنجان',
+      'Radish': 'فجل',
+      'Cabbage': 'ملفوف',
+      'Arugula': 'جرجير',
+      'Parsley': 'بقدونس',
+      'Mint': 'نعناع',
+      'Cilantro': 'كزبرة',
+      'Green Beans': 'فاصوليا خضراء',
+      'Black-eyed Peas': 'لوبيا',
+      'Peas': 'بازلاء',
+    },
+  };
+
+  String _translateFoodName(String foodName) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+
+    if (isArabic) {
+      // إذا كانت اللغة عربي، أرجع النص كما هو
+      return foodName;
+    } else {
+      // إذا كانت اللغة إنجليزي، ترجم من العربي للإنجليزي
+      return _foodTranslations['ar_to_en']?[foodName] ?? foodName;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -291,7 +356,7 @@ class _HomeContentScreenState extends State<HomeContentScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             context.tr('services'),
@@ -410,7 +475,7 @@ class _HomeContentScreenState extends State<HomeContentScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             context.tr('food_categories'),
@@ -441,7 +506,7 @@ class _HomeContentScreenState extends State<HomeContentScreen> {
       controller: _searchController,
       textDirection: TextDirection.rtl,
       decoration: InputDecoration(
-        hintText: 'ابحث عن طعام...',
+        hintText: context.tr('search_food'),
         hintStyle: TextStyle(color: AppColors.textLight, fontSize: 14),
         prefixIcon: Icon(Icons.search, color: AppColors.primary),
         suffixIcon: _searchController.text.isNotEmpty
@@ -495,7 +560,7 @@ class _HomeContentScreenState extends State<HomeContentScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'لم يتم العثور على نتائج',
+              context.tr('no_results'),
               style: TextStyle(
                 fontSize: 16,
                 color: isDark ? Colors.grey[400] : AppColors.textLight,
@@ -558,7 +623,7 @@ class _HomeContentScreenState extends State<HomeContentScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      food['name'] as String,
+                      _translateFoodName(food['name'] as String),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -610,8 +675,8 @@ class _HomeContentScreenState extends State<HomeContentScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text(
-                  'إضافة',
+                child: Text(
+                  context.tr('add'),
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -640,7 +705,7 @@ class _HomeContentScreenState extends State<HomeContentScreen> {
         final category = foodCategories[index];
         return _buildCategoryItem(
           emoji: category['emoji'] as String,
-          name: category['name'] as String,
+          name: context.tr(category['name'] as String),
           color: category['color'] as Color,
           isDark: isDark,
           category: category,
@@ -770,7 +835,7 @@ class _HomeContentScreenState extends State<HomeContentScreen> {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    category['name'] as String,
+                    context.tr(category['name'] as String),
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -817,7 +882,7 @@ class _HomeContentScreenState extends State<HomeContentScreen> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  item['name'] as String,
+                  _translateFoodName(item['name'] as String),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -857,8 +922,8 @@ class _HomeContentScreenState extends State<HomeContentScreen> {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text(
-              'إضافة',
+            child: Text(
+              context.tr('add'),
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -1271,7 +1336,7 @@ class _HomeContentScreenState extends State<HomeContentScreen> {
       child: Column(
         children: [
           Text(
-            food['name'] as String,
+            _translateFoodName(food['name'] as String),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,

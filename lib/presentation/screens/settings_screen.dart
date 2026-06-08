@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/constants/colors.dart';
 import '../../core/localization/app_localizations.dart';
+import '../../core/utils/direction_helper.dart';
 import '../../logic/cubits/settings_cubit.dart';
 import '../../logic/cubits/user_cubit.dart';
 import 'about_app_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_of_service_screen.dart';
+import 'references_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -27,8 +29,6 @@ class SettingsScreen extends StatelessWidget {
                 _buildHeader(context, isDark),
                 const SizedBox(height: 24),
                 _buildThemeSection(context, state, isDark),
-                const SizedBox(height: 20),
-                _buildLanguageSection(context, state, isDark),
                 const SizedBox(height: 20),
                 _buildNotificationsSection(context, state, isDark),
                 const SizedBox(height: 20),
@@ -60,7 +60,7 @@ class SettingsScreen extends StatelessWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        textDirection: TextDirection.rtl,
+        textDirection: context.textDirection,
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -370,6 +370,7 @@ class SettingsScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
+          // إشعارات عامة
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -443,6 +444,87 @@ class SettingsScreen extends StatelessWidget {
                   onChanged: (value) {
                     context.read<SettingsCubit>().toggleNotifications();
                   },
+                  activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
+                  activeThumbColor: AppColors.primary,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          // إشعارات دورية (كل 3 دقائق)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDark ? AppTheme.darkCard : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.06),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              textDirection: TextDirection.rtl,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  textDirection: TextDirection.rtl,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: state.periodicNotificationsEnabled
+                            ? AppColors.primary.withValues(alpha: 0.15)
+                            : Colors.grey.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.alarm_rounded,
+                        color: state.periodicNotificationsEnabled
+                            ? AppColors.primary
+                            : Colors.grey[600],
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'تذكير دوري',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : AppColors.textDark,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          state.periodicNotificationsEnabled
+                              ? 'تذكير كل 3 دقائق'
+                              : 'تفعيل التذكير الدوري',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark
+                                ? Colors.grey[400]
+                                : AppColors.textLight,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Switch(
+                  value: state.periodicNotificationsEnabled,
+                  onChanged: state.notificationsMuted
+                      ? null
+                      : (value) {
+                          context
+                              .read<SettingsCubit>()
+                              .togglePeriodicNotifications();
+                        },
                   activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
                   activeThumbColor: AppColors.primary,
                 ),
@@ -553,6 +635,23 @@ class SettingsScreen extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => const TermsOfServiceScreen(),
+                      ),
+                    );
+                  },
+                ),
+                _buildDivider(isDark),
+                _buildEnhancedAboutItem(
+                  context: context,
+                  icon: Icons.menu_book_rounded,
+                  title: 'المصادر والمراجع',
+                  subtitle: 'المصادر العلمية والأكاديمية',
+                  gradient: [Colors.orange.shade400, Colors.orange.shade600],
+                  isDark: isDark,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ReferencesScreen(),
                       ),
                     );
                   },

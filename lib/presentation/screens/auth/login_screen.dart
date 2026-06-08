@@ -36,15 +36,13 @@ class _LoginScreenState extends State<LoginScreen>
         curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
       ),
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic),
-      ),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic),
+          ),
+        );
     _animationController.forward();
   }
 
@@ -59,9 +57,9 @@ class _LoginScreenState extends State<LoginScreen>
   Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
       await context.read<UserCubit>().login(
-            _emailController.text.trim(),
-            _passwordController.text,
-          );
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
     }
   }
 
@@ -76,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen>
           setState(() => _isLoading = true);
         } else if (state is UserAuthenticated) {
           setState(() => _isLoading = false);
-          
+
           showTopSnackBar(
             Overlay.of(context),
             CustomSnackBar.success(
@@ -93,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen>
           });
         } else if (state is UserError) {
           setState(() => _isLoading = false);
-          
+
           showTopSnackBar(
             Overlay.of(context),
             CustomSnackBar.error(
@@ -149,30 +147,38 @@ class _LoginScreenState extends State<LoginScreen>
                                       );
                                     },
                                     child: Container(
-                                      width: isSmallScreen ? 90 : 110,
-                                      height: isSmallScreen ? 90 : 110,
+                                      width: isSmallScreen ? 130 : 145,
+                                      height: isSmallScreen ? 130 : 145,
                                       decoration: BoxDecoration(
                                         color: Colors.white,
                                         shape: BoxShape.circle,
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.black.withValues(alpha: 0.2),
+                                            color: Colors.black.withValues(
+                                              alpha: 0.2,
+                                            ),
                                             blurRadius: 25,
                                             offset: const Offset(0, 10),
                                           ),
                                         ],
                                       ),
                                       child: ClipOval(
-                                        child: Image.asset(
-                                          'assets/images/logo_app.jpeg',
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) {
-                                            return Icon(
-                                              Icons.restaurant_menu,
-                                              size: isSmallScreen ? 45 : 55,
-                                              color: AppColors.primary,
-                                            );
-                                          },
+                                        child: Container(
+                                          padding: const EdgeInsets.all(8),
+                                          child: Image.asset(
+                                            'assets/images/logo_app.jpeg',
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                                  return Icon(
+                                                    Icons.restaurant_menu,
+                                                    size: isSmallScreen
+                                                        ? 50
+                                                        : 60,
+                                                    color: AppColors.primary,
+                                                  );
+                                                },
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -192,7 +198,9 @@ class _LoginScreenState extends State<LoginScreen>
                                     'تغذية ذكية لحياة صحية',
                                     style: TextStyle(
                                       fontSize: isSmallScreen ? 13 : 14,
-                                      color: Colors.white.withValues(alpha: 0.9),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.9,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -207,9 +215,7 @@ class _LoginScreenState extends State<LoginScreen>
                                 opacity: _fadeAnimation,
                                 child: Container(
                                   width: double.infinity,
-                                  constraints: BoxConstraints(
-                                    maxWidth: 600,
-                                  ),
+                                  constraints: BoxConstraints(maxWidth: 600),
                                   padding: EdgeInsets.fromLTRB(
                                     24,
                                     isSmallScreen ? 24 : 32,
@@ -226,7 +232,8 @@ class _LoginScreenState extends State<LoginScreen>
                                   child: Form(
                                     key: _formKey,
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
@@ -245,27 +252,34 @@ class _LoginScreenState extends State<LoginScreen>
                                             color: AppColors.textLight,
                                           ),
                                         ),
-                                        SizedBox(height: isSmallScreen ? 20 : 28),
+                                        SizedBox(
+                                          height: isSmallScreen ? 20 : 28,
+                                        ),
 
                                         _buildInputField(
                                           controller: _emailController,
                                           label: 'البريد الإلكتروني',
                                           hint: 'example@email.com',
                                           icon: Icons.email_rounded,
-                                          keyboardType: TextInputType.emailAddress,
+                                          keyboardType:
+                                              TextInputType.emailAddress,
                                           textDirection: TextDirection.ltr,
                                           validator: (value) {
-                                            if (value == null || value.isEmpty) {
+                                            if (value == null ||
+                                                value.isEmpty) {
                                               return 'من فضلك أدخل البريد الإلكتروني';
                                             }
-                                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                                                .hasMatch(value)) {
+                                            if (!RegExp(
+                                              r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                            ).hasMatch(value)) {
                                               return 'البريد الإلكتروني غير صحيح';
                                             }
                                             return null;
                                           },
                                         ),
-                                        SizedBox(height: isSmallScreen ? 14 : 18),
+                                        SizedBox(
+                                          height: isSmallScreen ? 14 : 18,
+                                        ),
 
                                         _buildInputField(
                                           controller: _passwordController,
@@ -282,12 +296,15 @@ class _LoginScreenState extends State<LoginScreen>
                                               color: AppColors.textLight,
                                             ),
                                             onPressed: () {
-                                              setState(() =>
-                                                  _obscurePassword = !_obscurePassword);
+                                              setState(
+                                                () => _obscurePassword =
+                                                    !_obscurePassword,
+                                              );
                                             },
                                           ),
                                           validator: (value) {
-                                            if (value == null || value.isEmpty) {
+                                            if (value == null ||
+                                                value.isEmpty) {
                                               return 'من فضلك أدخل كلمة المرور';
                                             }
                                             if (value.length < 6) {
@@ -296,14 +313,20 @@ class _LoginScreenState extends State<LoginScreen>
                                             return null;
                                           },
                                         ),
-                                        SizedBox(height: isSmallScreen ? 20 : 24),
+                                        SizedBox(
+                                          height: isSmallScreen ? 20 : 24,
+                                        ),
 
                                         _buildPrimaryButton(
-                                          onPressed: _isLoading ? null : _handleLogin,
+                                          onPressed: _isLoading
+                                              ? null
+                                              : _handleLogin,
                                           isLoading: _isLoading,
                                           text: 'تسجيل الدخول',
                                         ),
-                                        SizedBox(height: isSmallScreen ? 16 : 20),
+                                        SizedBox(
+                                          height: isSmallScreen ? 16 : 20,
+                                        ),
 
                                         Row(
                                           children: [
@@ -315,8 +338,10 @@ class _LoginScreenState extends State<LoginScreen>
                                               ),
                                             ),
                                             Padding(
-                                              padding: const EdgeInsets.symmetric(
-                                                  horizontal: 16),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 16,
+                                                  ),
                                               child: Text(
                                                 'أو',
                                                 style: TextStyle(
@@ -335,30 +360,39 @@ class _LoginScreenState extends State<LoginScreen>
                                             ),
                                           ],
                                         ),
-                                        SizedBox(height: isSmallScreen ? 16 : 20),
+                                        SizedBox(
+                                          height: isSmallScreen ? 16 : 20,
+                                        ),
 
                                         Center(
                                           child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
                                             children: [
                                               Text(
                                                 'ليس لديك حساب؟',
                                                 style: TextStyle(
                                                   color: AppColors.textLight,
-                                                  fontSize: isSmallScreen ? 14 : 15,
+                                                  fontSize: isSmallScreen
+                                                      ? 14
+                                                      : 15,
                                                 ),
                                               ),
                                               TextButton(
                                                 onPressed: () {
                                                   Navigator.pushNamed(
-                                                      context, '/register');
+                                                    context,
+                                                    '/register',
+                                                  );
                                                 },
                                                 child: Text(
                                                   'سجل الآن',
                                                   style: TextStyle(
                                                     color: AppColors.primary,
                                                     fontWeight: FontWeight.bold,
-                                                    fontSize: isSmallScreen ? 14 : 15,
+                                                    fontSize: isSmallScreen
+                                                        ? 14
+                                                        : 15,
                                                   ),
                                                 ),
                                               ),
@@ -447,8 +481,10 @@ class _LoginScreenState extends State<LoginScreen>
               borderRadius: BorderRadius.circular(14),
               borderSide: const BorderSide(color: AppColors.error, width: 2),
             ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
           ),
           validator: validator,
         ),

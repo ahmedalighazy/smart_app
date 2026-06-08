@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import '../../logic/cubits/user_cubit.dart';
 import '../../data/services/hive_service.dart';
-import '../../data/services/meal_model.dart';
 import '../../data/services/pdf_service.dart';
 import '../../core/constants/colors.dart';
 import 'pdf_viewer_screen.dart';
@@ -16,6 +14,31 @@ class ResultsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'نتائج التحليل',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {
+              _exportToPDF(context);
+            },
+            icon: const Icon(Icons.download, color: Colors.white),
+          ),
+        ],
+      ),
       body: BlocBuilder<UserCubit, UserState>(
         builder: (context, state) {
           if (state is UserLoading) {
@@ -49,11 +72,7 @@ class ResultsScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.info_outline,
-                  size: 80,
-                  color: Colors.grey.shade400,
-                ),
+                Icon(Icons.info_outline, size: 80, color: Colors.grey.shade400),
                 const SizedBox(height: 20),
                 const Text(
                   'لا توجد بيانات',
@@ -67,10 +86,7 @@ class ResultsScreen extends StatelessWidget {
                 const SizedBox(height: 8),
                 const Text(
                   'الرجاء إدخال بياناتك أولاً',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF757575),
-                  ),
+                  style: TextStyle(fontSize: 16, color: Color(0xFF757575)),
                   textDirection: TextDirection.rtl,
                 ),
               ],
@@ -83,133 +99,25 @@ class ResultsScreen extends StatelessWidget {
 
   Widget _buildResultsContent(BuildContext context, dynamic result) {
     return SingleChildScrollView(
-      child: Column(
-        children: [
-          // Header
-          _buildHeader(context),
-          
-          // Main content
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                // Macros with Circular Progress
-                _buildMacrosWithCircle(result),
-                const SizedBox(height: 20),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // Macros with Circular Progress
+            _buildMacrosWithCircle(result),
+            const SizedBox(height: 20),
 
-                // Bar Chart for Macros Comparison
-                _buildMacrosBarChart(result),
-                const SizedBox(height: 20),
+            // Bar Chart for Macros Comparison
+            _buildMacrosBarChart(result),
+            const SizedBox(height: 20),
 
-                // Suggested Meals
-                _buildSuggestedMeals(result),
-                const SizedBox(height: 16),
-
-                // Today's Meals
-                _buildTodaysMeals(),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.primary,
-            AppColors.primaryDark,
+            // Suggested Meals
+            _buildSuggestedMeals(result),
+            const SizedBox(height: 16),
           ],
         ),
       ),
-      padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/ai_recommendations');
-                    },
-                    icon: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.psychology, size: 20, color: Colors.white),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      _showAddMealDialog(context);
-                    },
-                    icon: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.add, size: 20, color: Colors.white),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      _exportToPDF(context);
-                    },
-                    icon: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.download, size: 20, color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    'نتائج التحليل',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                    textDirection: TextDirection.rtl,
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'احتياجاتك الغذائية اليومية',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.white70,
-                    ),
-                    textDirection: TextDirection.rtl,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
     );
-  }
-
-  void _showAddMealDialog(BuildContext context) {
-    Navigator.pushNamed(context, '/home');
   }
 
   void _exportToPDF(BuildContext context) async {
@@ -217,7 +125,7 @@ class ResultsScreen extends StatelessWidget {
     if (state is UserCalculated) {
       final todayMeals = HiveService.getTodayMeals();
       final userName = state.user.name ?? 'المستخدم';
-      
+
       // Show loading
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -253,7 +161,9 @@ class ResultsScreen extends StatelessWidget {
               ),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
               duration: const Duration(seconds: 3),
             ),
           );
@@ -276,78 +186,158 @@ class ResultsScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        textDirection: TextDirection.rtl,
-        children: [
-          // Circular Progress on the right
-          SizedBox(
-            width: 120,
-            height: 120,
-            child: Stack(
-              alignment: Alignment.center,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isSmallScreen = constraints.maxWidth < 400;
+
+          if (isSmallScreen) {
+            // على الشاشات الصغيرة، اعرض العناصر بشكل عمودي
+            return Column(
               children: [
+                // Circular Progress
                 SizedBox(
-                  width: 120,
-                  height: 120,
-                  child: CircularProgressIndicator(
-                    value: result.tdee / 2500,
-                    strokeWidth: 8,
-                    backgroundColor: Colors.grey.shade200,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      _getCalorieColor(result.tdee),
-                    ),
+                  width: 100,
+                  height: 100,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: CircularProgressIndicator(
+                          value: result.tdee / 2500,
+                          strokeWidth: 6,
+                          backgroundColor: Colors.grey.shade200,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            _getCalorieColor(result.tdee),
+                          ),
+                        ),
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '${result.tdee.toStringAsFixed(0)}',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange,
+                            ),
+                          ),
+                          const Text(
+                            'سعرة',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Color(0xFF757575),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
+                const SizedBox(height: 20),
+                // Macros
                 Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      '${result.tdee.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange,
-                      ),
+                    _buildMacroRow(
+                      'الكربوهيدرات',
+                      '${result.macros.carbs.toStringAsFixed(1)} / 275.0 ج',
+                      Colors.green,
                     ),
-                    const Text(
-                      'سعرة',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF757575),
-                      ),
+                    const SizedBox(height: 12),
+                    _buildMacroRow(
+                      'الدهون',
+                      '${result.macros.fats.toStringAsFixed(1)} / 78.0 ج',
+                      Colors.orange,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildMacroRow(
+                      'البروتين',
+                      '${result.macros.protein.toStringAsFixed(1)} / 50.0 ج',
+                      Colors.purple,
                     ),
                   ],
                 ),
               ],
-            ),
-          ),
-          const SizedBox(width: 20),
-          // Macros on the left
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+            );
+          } else {
+            // على الشاشات الكبيرة، اعرض العناصر بشكل أفقي
+            return Row(
+              textDirection: TextDirection.rtl,
               children: [
-                _buildMacroRow(
-                  'الكربوهيدرات',
-                  '${result.macros.carbs.toStringAsFixed(1)} / 275.0 ج',
-                  Colors.green,
+                // Circular Progress on the right
+                SizedBox(
+                  width: 120,
+                  height: 120,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 120,
+                        height: 120,
+                        child: CircularProgressIndicator(
+                          value: result.tdee / 2500,
+                          strokeWidth: 8,
+                          backgroundColor: Colors.grey.shade200,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            _getCalorieColor(result.tdee),
+                          ),
+                        ),
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '${result.tdee.toStringAsFixed(0)}',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange,
+                            ),
+                          ),
+                          const Text(
+                            'سعرة',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF757575),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 12),
-                _buildMacroRow(
-                  'الدهون',
-                  '${result.macros.fats.toStringAsFixed(1)} / 78.0 ج',
-                  Colors.orange,
-                ),
-                const SizedBox(height: 12),
-                _buildMacroRow(
-                  'البروتين',
-                  '${result.macros.protein.toStringAsFixed(1)} / 50.0 ج',
-                  Colors.purple,
+                const SizedBox(width: 20),
+                // Macros on the left
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      _buildMacroRow(
+                        'الكربوهيدرات',
+                        '${result.macros.carbs.toStringAsFixed(1)} / 275.0 ج',
+                        Colors.green,
+                      ),
+                      const SizedBox(height: 12),
+                      _buildMacroRow(
+                        'الدهون',
+                        '${result.macros.fats.toStringAsFixed(1)} / 78.0 ج',
+                        Colors.orange,
+                      ),
+                      const SizedBox(height: 12),
+                      _buildMacroRow(
+                        'البروتين',
+                        '${result.macros.protein.toStringAsFixed(1)} / 50.0 ج',
+                        Colors.purple,
+                      ),
+                    ],
+                  ),
                 ),
               ],
-            ),
-          ),
-        ],
+            );
+          }
+        },
       ),
     );
   }
@@ -446,10 +436,7 @@ class ResultsScreen extends StatelessWidget {
           const SizedBox(height: 8),
           const Text(
             'احتياجاتك مقارنة بالأهداف المقترحة',
-            style: TextStyle(
-              fontSize: 12,
-              color: Color(0xFF757575),
-            ),
+            style: TextStyle(fontSize: 12, color: Color(0xFF757575)),
             textDirection: TextDirection.rtl,
           ),
           const SizedBox(height: 20),
@@ -465,11 +452,11 @@ class ResultsScreen extends StatelessWidget {
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       String label = '';
                       String type = rodIndex == 0 ? 'احتياجاتك' : 'الهدف';
-                      
+
                       if (groupIndex == 0) label = 'الكربوهيدرات';
                       if (groupIndex == 1) label = 'البروتين';
                       if (groupIndex == 2) label = 'الدهون';
-                      
+
                       return BarTooltipItem(
                         '$label\n$type: ${rod.toY.toStringAsFixed(1)} ج',
                         const TextStyle(
@@ -513,7 +500,7 @@ class ResultsScreen extends StatelessWidget {
                         if (value == 0) text = 'كربوهيدرات';
                         if (value == 1) text = 'بروتين';
                         if (value == 2) text = 'دهون';
-                        
+
                         return Padding(
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
@@ -646,10 +633,7 @@ class ResultsScreen extends StatelessWidget {
         const SizedBox(width: 6),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 11,
-            color: Color(0xFF757575),
-          ),
+          style: const TextStyle(fontSize: 11, color: Color(0xFF757575)),
         ),
       ],
     );
@@ -755,21 +739,24 @@ class ResultsScreen extends StatelessWidget {
       suggestions.add({
         'emoji': '🍗',
         'title': 'زيادة البروتين والسعرات',
-        'description': 'وزنك أقل من الطبيعي. ركز على الأطعمة الغنية بالبروتين والسعرات الحرارية مثل الدجاج والبيض والمكسرات.',
+        'description':
+            'وزنك أقل من الطبيعي. ركز على الأطعمة الغنية بالبروتين والسعرات الحرارية مثل الدجاج والبيض والمكسرات.',
         'color': Colors.orange,
       });
     } else if (bmi > 30) {
       suggestions.add({
         'emoji': '🥗',
         'title': 'تقليل السعرات والدهون',
-        'description': 'وزنك أعلى من الطبيعي. ركز على الخضروات والفواكه والبروتين قليل الدسم.',
+        'description':
+            'وزنك أعلى من الطبيعي. ركز على الخضروات والفواكه والبروتين قليل الدسم.',
         'color': Colors.red,
       });
     } else {
       suggestions.add({
         'emoji': '⚖️',
         'title': 'الحفاظ على التوازن',
-        'description': 'وزنك صحي. استمر في تناول وجبات متوازنة من جميع المجموعات الغذائية.',
+        'description':
+            'وزنك صحي. استمر في تناول وجبات متوازنة من جميع المجموعات الغذائية.',
         'color': Colors.green,
       });
     }
@@ -779,7 +766,8 @@ class ResultsScreen extends StatelessWidget {
       suggestions.add({
         'emoji': '💪',
         'title': 'زيادة البروتين',
-        'description': 'احتياجك من البروتين منخفض. أضف المزيد من اللحوم والأسماك والبيض والألبان.',
+        'description':
+            'احتياجك من البروتين منخفض. أضف المزيد من اللحوم والأسماك والبيض والألبان.',
         'color': Colors.orange,
       });
     }
@@ -789,7 +777,8 @@ class ResultsScreen extends StatelessWidget {
       suggestions.add({
         'emoji': '🌾',
         'title': 'اختر الكربوهيدرات المعقدة',
-        'description': 'احتياجك من الكربوهيدرات مرتفع. اختر الحبوب الكاملة والأرز البني بدلاً من الأبيض.',
+        'description':
+            'احتياجك من الكربوهيدرات مرتفع. اختر الحبوب الكاملة والأرز البني بدلاً من الأبيض.',
         'color': Colors.blue,
       });
     }
@@ -799,192 +788,12 @@ class ResultsScreen extends StatelessWidget {
       suggestions.add({
         'emoji': '🔥',
         'title': 'احتياجك من السعرات مرتفع',
-        'description': 'تحتاج إلى سعرات حرارية أكثر. تأكد من تناول وجبات منتظمة وخفيفة بين الوجبات الرئيسية.',
+        'description':
+            'تحتاج إلى سعرات حرارية أكثر. تأكد من تناول وجبات منتظمة وخفيفة بين الوجبات الرئيسية.',
         'color': Colors.red,
       });
     }
 
     return suggestions;
-  }
-
-  Widget _buildTodaysMeals() {
-    return ValueListenableBuilder(
-      valueListenable: HiveService.mealsBox.listenable(),
-      builder: (context, Box<MealModel> box, _) {
-        final todayMeals = HiveService.getTodayMeals();
-
-        return Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                textDirection: TextDirection.rtl,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '${todayMeals.length} وجبة',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                  const Text(
-                    'الوجبات المضافة اليوم',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF212121),
-                    ),
-                    textDirection: TextDirection.rtl,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              if (todayMeals.isEmpty)
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Text(
-                      'لم تضف أي وجبات بعد',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
-                      ),
-                      textDirection: TextDirection.rtl,
-                    ),
-                  ),
-                )
-              else
-                Column(
-                  children: List.generate(
-                    todayMeals.length,
-                    (index) {
-                      if (index > 0) {
-                        return Column(
-                          children: [
-                            const SizedBox(height: 12),
-                            _buildMealItem(todayMeals[index]),
-                          ],
-                        );
-                      }
-                      return _buildMealItem(todayMeals[index]);
-                    },
-                  ),
-                ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildMealItem(MealModel meal) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        textDirection: TextDirection.rtl,
-        children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: Colors.grey.shade200,
-            ),
-            child: meal.imageUrl != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(
-                      meal.imageUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Center(
-                          child: Text(meal.categoryEmoji, style: const TextStyle(fontSize: 24)),
-                        );
-                      },
-                    ),
-                  )
-                : Center(
-                    child: Text(meal.categoryEmoji, style: const TextStyle(fontSize: 24)),
-                  ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  meal.name,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF212121),
-                  ),
-                  textDirection: TextDirection.rtl,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  meal.categoryName,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
-                  textDirection: TextDirection.rtl,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${meal.calories}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.orange,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                'سعرة',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
   }
 }

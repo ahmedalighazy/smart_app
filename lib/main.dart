@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'core/constants/colors.dart';
 import 'core/constants/dio/dio_helper.dart';
 import 'core/localization/app_localizations.dart';
@@ -26,24 +27,58 @@ import 'data/services/auth_service.dart';
 import 'data/services/notification_service.dart';
 import 'data/services/notification_history_service.dart';
 import 'data/services/background_tips_service.dart';
+import 'data/services/composite_meal_service.dart';
+import 'data/models/composite_meal_model.dart';
+import 'presentation/screens/composite_meals_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  DioHelper.init();
-  await HiveService.init();
-  await NotificationHistoryService.init();
-  await NotificationService().initialize();
-  await NotificationService().requestPermissions();
-  
-  // بدء خدمة النصائح التلقائية
-  BackgroundTipsService.start();
-  
-  // استعادة التوكين المحفوظ عند بدء التطبيق
-  final token = await AuthService.getToken();
-  if (token != null && token.isNotEmpty) {
-    DioHelper.setToken(token);
+
+  try {
+    DioHelper.init();
+    await HiveService.init();
+
+    // تسجيل Hive Adapters للوجبات المركبة
+    Hive.registerAdapter(CompositeMealModelAdapter());
+    Hive.registerAdapter(CompositeMealItemAdapter());
+    await CompositeMealService.init();
+
+    await NotificationHistoryService.init();
+
+    try {
+      await NotificationService().initialize();
+      await NotificationService().requestPermissions();
+
+      // استعادة الإشعارات الدورية إذا كانت مفعلة
+      await NotificationService().restorePeriodicNotifications();
+    } catch (e) {
+      debugPrint('Notification service error: $e');
+      // نستمر حتى لو فشلت الإشعارات
+    }
+
+    // بدء خدمة النصائح التلقائية
+    try {
+      BackgroundTipsService.start();
+    } catch (e) {
+      debugPrint('Background tips service error: $e');
+      // نستمر حتى لو فشلت الخدمة
+    }
+
+    // استعادة التوكين المحفوظ عند بدء التطبيق
+    try {
+      final token = await AuthService.getToken();
+      if (token != null && token.isNotEmpty) {
+        DioHelper.setToken(token);
+      }
+    } catch (e) {
+      debugPrint('Token restoration error: $e');
+      // نستمر حتى لو فشلت استعادة التوكين
+    }
+  } catch (e) {
+    debugPrint('Initialization error: $e');
+    // نستمر حتى لو حدث خطأ في التهيئة
   }
-  
+
   runApp(const MyApp());
 }
 
@@ -63,7 +98,11 @@ class MyApp extends StatelessWidget {
       ],
       child: BlocBuilder<SettingsCubit, SettingsState>(
         builder: (context, state) {
+          // إضافة key لإجبار إعادة البناء عند تغيير اللغة
+          final appKey = ValueKey('app_${state.locale.languageCode}');
+
           return MaterialApp(
+            key: appKey,
             title: 'Smart Nutrition',
             debugShowCheckedModeBanner: false,
             theme: ThemeData(
@@ -80,13 +119,33 @@ class MyApp extends StatelessWidget {
                 seedColor: AppColors.primary,
                 brightness: Brightness.dark,
               ),
-              textTheme: GoogleFonts.cairoTextTheme(
-                ThemeData.dark().textTheme,
-              ),
+              textTheme: GoogleFonts.cairoTextTheme(ThemeData.dark().textTheme),
             ),
             themeMode: state.themeMode,
             locale: state.locale,
+            // إضافة textDirection بناءً على اللغة مع إعادة البناء
+            builder: (context, child) {
+              // التأكد من إعادة البناء عند تغيير اللغة
+              final isArabic = state.locale.languageCode == 'ar';
+              debugPrint(
+                '🌐 Language changed to: ${state.locale.languageCode}',
+              );
+              debugPrint('📱 Text direction: ${isArabic ? 'RTL' : 'LTR'}');
+
+              return Directionality(
+                textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+                child: child!,
+              );
+            },
             supportedLocales: const [Locale('ar'), Locale('en')],
+            localeResolutionCallback: (locale, supportedLocales) {
+              // إذا كانت اللغة المحفوظة عربي، استخدمها
+              if (state.locale.languageCode == 'ar') {
+                return const Locale('ar');
+              }
+              // وإلا استخدم الإنجليزية
+              return const Locale('en');
+            },
             localizationsDelegates: const [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
@@ -102,9 +161,11 @@ class MyApp extends StatelessWidget {
               '/input': (context) => const InputScreen(),
               '/results': (context) => const ResultsScreen(),
               '/food_scanner': (context) => const FoodScannerScreen(),
-              '/ai_recommendations': (context) => const AIRecommendationsScreen(),
+              '/ai_recommendations': (context) =>
+                  const AIRecommendationsScreen(),
               '/tips': (context) => const TipsScreen(),
               '/notifications': (context) => const NotificationsScreen(),
+              '/composite_meals': (context) => const CompositeMealsScreen(),
             },
           );
         },
@@ -128,21 +189,34 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
   }
 
   Future<void> _checkAuth() async {
-    // محاولة استعادة الجلسة من التوكين المحفوظ
-    final isLoggedIn = await AuthService.isLoggedIn();
-    
-    if (mounted) {
-      if (isLoggedIn) {
-        // استعادة الـ token والانتقال للصفحة الرئيسية
-        await context.read<UserCubit>().checkAuth();
-        if (mounted) {
-          Navigator.pushReplacementNamed(context, '/home');
+    try {
+      // محاولة استعادة الجلسة من التوكين المحفوظ
+      final isLoggedIn = await AuthService.isLoggedIn();
+
+      if (mounted) {
+        if (isLoggedIn) {
+          // استعادة الـ token والانتقال للصفحة الرئيسية
+          try {
+            await context.read<UserCubit>().checkAuth();
+          } catch (e) {
+            // في حالة فشل checkAuth، نستمر للصفحة الرئيسية
+            debugPrint('Error in checkAuth: $e');
+          }
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, '/home');
+          }
+        } else {
+          // لا يوجد توكين، الانتقال لصفحة تسجيل الدخول
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, '/login');
+          }
         }
-      } else {
-        // لا يوجد توكين، الانتقال لصفحة تسجيل الدخول
-        if (mounted) {
-          Navigator.pushReplacementNamed(context, '/login');
-        }
+      }
+    } catch (e) {
+      // في حالة حدوث أي خطأ، نذهب لصفحة تسجيل الدخول
+      debugPrint('Error in _checkAuth: $e');
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/login');
       }
     }
   }

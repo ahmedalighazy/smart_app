@@ -4,7 +4,7 @@ import 'complete_meals_data.dart';
 final List<Map<String, dynamic>> foodCategories = [
   {
     'emoji': '🍎',
-    'name': 'فواكه',
+    'name': 'fruits',
     'color': Colors.red,
     'imageUrl': 'assets/images/فواكهه.png',
     'isLocalImage': true,
@@ -391,7 +391,7 @@ final List<Map<String, dynamic>> foodCategories = [
   },
   {
     'emoji': '🥗',
-    'name': 'سلطات',
+    'name': 'salads',
     'color': Colors.green,
     'imageUrl': 'assets/images/سلطات.png',
     'isLocalImage': true,
@@ -778,7 +778,7 @@ final List<Map<String, dynamic>> foodCategories = [
   },
   {
     'emoji': '🍗',
-    'name': 'بروتين',
+    'name': 'protein',
     'color': Colors.orange,
     'imageUrl': 'assets/images/لحوم.png',
     'isLocalImage': true,
@@ -1165,7 +1165,7 @@ final List<Map<String, dynamic>> foodCategories = [
   },
   {
     'emoji': '🥛',
-    'name': 'ألبان',
+    'name': 'dairy',
     'color': Colors.blue,
     'imageUrl': 'assets/images/البان.png',
     'isLocalImage': true,
@@ -1573,7 +1573,7 @@ final List<Map<String, dynamic>> foodCategories = [
   },
   {
     'emoji': '🍞',
-    'name': 'حبوب',
+    'name': 'grains',
     'color': Colors.brown,
     'imageUrl': 'assets/images/حبوب.png',
     'isLocalImage': true,
@@ -1953,7 +1953,7 @@ final List<Map<String, dynamic>> foodCategories = [
   },
   {
     'emoji': '🥕',
-    'name': 'خضروات',
+    'name': 'vegetables',
     'color': Colors.lightGreen,
     'imageUrl': 'assets/images/سلطه.png',
     'isLocalImage': true,

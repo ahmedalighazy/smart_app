@@ -39,15 +39,13 @@ class _RegisterScreenState extends State<RegisterScreen>
         curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
       ),
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic),
-      ),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic),
+          ),
+        );
     _animationController.forward();
   }
 
@@ -64,10 +62,10 @@ class _RegisterScreenState extends State<RegisterScreen>
   Future<void> _handleRegister() async {
     if (_formKey.currentState!.validate()) {
       await context.read<UserCubit>().register(
-            _nameController.text.trim(),
-            _emailController.text.trim(),
-            _passwordController.text,
-          );
+        _nameController.text.trim(),
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
     }
   }
 
@@ -82,7 +80,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           setState(() => _isLoading = true);
         } else if (state is UserAuthenticated) {
           setState(() => _isLoading = false);
-          
+
           showTopSnackBar(
             Overlay.of(context),
             CustomSnackBar.success(
@@ -99,7 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           });
         } else if (state is UserError) {
           setState(() => _isLoading = false);
-          
+
           showTopSnackBar(
             Overlay.of(context),
             CustomSnackBar.error(
@@ -153,8 +151,12 @@ class _RegisterScreenState extends State<RegisterScreen>
                                         icon: Container(
                                           padding: const EdgeInsets.all(8),
                                           decoration: BoxDecoration(
-                                            color: Colors.white.withValues(alpha: 0.2),
-                                            borderRadius: BorderRadius.circular(12),
+                                            color: Colors.white.withValues(
+                                              alpha: 0.2,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                           ),
                                           child: const Icon(
                                             Icons.arrow_forward_ios,
@@ -170,33 +172,44 @@ class _RegisterScreenState extends State<RegisterScreen>
                                     duration: const Duration(milliseconds: 800),
                                     curve: Curves.elasticOut,
                                     builder: (context, value, child) {
-                                      return Transform.scale(scale: value, child: child);
+                                      return Transform.scale(
+                                        scale: value,
+                                        child: child,
+                                      );
                                     },
                                     child: Container(
-                                      width: isSmallScreen ? 80 : 90,
-                                      height: isSmallScreen ? 80 : 90,
+                                      width: isSmallScreen ? 140 : 160,
+                                      height: isSmallScreen ? 140 : 160,
                                       decoration: BoxDecoration(
                                         color: Colors.white,
                                         shape: BoxShape.circle,
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.black.withValues(alpha: 0.2),
+                                            color: Colors.black.withValues(
+                                              alpha: 0.2,
+                                            ),
                                             blurRadius: 20,
                                             offset: const Offset(0, 8),
                                           ),
                                         ],
                                       ),
                                       child: ClipOval(
-                                        child: Image.asset(
-                                          'assets/images/logo_app.jpeg',
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) {
-                                            return Icon(
-                                              Icons.person_add_rounded,
-                                              size: isSmallScreen ? 40 : 45,
-                                              color: AppColors.primary,
-                                            );
-                                          },
+                                        child: Container(
+                                          padding: const EdgeInsets.all(4),
+                                          child: Image.asset(
+                                            'assets/images/logo_app.jpeg',
+                                            fit: BoxFit.contain,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                                  return Icon(
+                                                    Icons.person_add_rounded,
+                                                    size: isSmallScreen
+                                                        ? 40
+                                                        : 45,
+                                                    color: AppColors.primary,
+                                                  );
+                                                },
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -242,7 +255,8 @@ class _RegisterScreenState extends State<RegisterScreen>
                                   child: Form(
                                     key: _formKey,
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
@@ -261,7 +275,9 @@ class _RegisterScreenState extends State<RegisterScreen>
                                             color: AppColors.textLight,
                                           ),
                                         ),
-                                        SizedBox(height: isSmallScreen ? 16 : 22),
+                                        SizedBox(
+                                          height: isSmallScreen ? 16 : 22,
+                                        ),
 
                                         _buildInputField(
                                           controller: _nameController,
@@ -270,7 +286,8 @@ class _RegisterScreenState extends State<RegisterScreen>
                                           icon: Icons.person_rounded,
                                           textDirection: TextDirection.rtl,
                                           validator: (value) {
-                                            if (value == null || value.isEmpty) {
+                                            if (value == null ||
+                                                value.isEmpty) {
                                               return 'من فضلك أدخل الاسم';
                                             }
                                             if (!value.trim().contains(' ')) {
@@ -282,27 +299,34 @@ class _RegisterScreenState extends State<RegisterScreen>
                                             return null;
                                           },
                                         ),
-                                        SizedBox(height: isSmallScreen ? 12 : 14),
+                                        SizedBox(
+                                          height: isSmallScreen ? 12 : 14,
+                                        ),
 
                                         _buildInputField(
                                           controller: _emailController,
                                           label: 'البريد الإلكتروني',
                                           hint: 'example@email.com',
                                           icon: Icons.email_rounded,
-                                          keyboardType: TextInputType.emailAddress,
+                                          keyboardType:
+                                              TextInputType.emailAddress,
                                           textDirection: TextDirection.ltr,
                                           validator: (value) {
-                                            if (value == null || value.isEmpty) {
+                                            if (value == null ||
+                                                value.isEmpty) {
                                               return 'من فضلك أدخل البريد الإلكتروني';
                                             }
-                                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                                                .hasMatch(value)) {
+                                            if (!RegExp(
+                                              r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                            ).hasMatch(value)) {
                                               return 'البريد الإلكتروني غير صحيح';
                                             }
                                             return null;
                                           },
                                         ),
-                                        SizedBox(height: isSmallScreen ? 12 : 14),
+                                        SizedBox(
+                                          height: isSmallScreen ? 12 : 14,
+                                        ),
 
                                         _buildInputField(
                                           controller: _passwordController,
@@ -319,12 +343,15 @@ class _RegisterScreenState extends State<RegisterScreen>
                                               color: AppColors.textLight,
                                             ),
                                             onPressed: () {
-                                              setState(() =>
-                                                  _obscurePassword = !_obscurePassword);
+                                              setState(
+                                                () => _obscurePassword =
+                                                    !_obscurePassword,
+                                              );
                                             },
                                           ),
                                           validator: (value) {
-                                            if (value == null || value.isEmpty) {
+                                            if (value == null ||
+                                                value.isEmpty) {
                                               return 'من فضلك أدخل كلمة المرور';
                                             }
                                             if (value.length < 6) {
@@ -333,10 +360,13 @@ class _RegisterScreenState extends State<RegisterScreen>
                                             return null;
                                           },
                                         ),
-                                        SizedBox(height: isSmallScreen ? 12 : 14),
+                                        SizedBox(
+                                          height: isSmallScreen ? 12 : 14,
+                                        ),
 
                                         _buildInputField(
-                                          controller: _confirmPasswordController,
+                                          controller:
+                                              _confirmPasswordController,
                                           label: 'تأكيد كلمة المرور',
                                           hint: '••••••••',
                                           icon: Icons.lock_rounded,
@@ -350,48 +380,64 @@ class _RegisterScreenState extends State<RegisterScreen>
                                               color: AppColors.textLight,
                                             ),
                                             onPressed: () {
-                                              setState(() => _obscureConfirmPassword =
-                                                  !_obscureConfirmPassword);
+                                              setState(
+                                                () => _obscureConfirmPassword =
+                                                    !_obscureConfirmPassword,
+                                              );
                                             },
                                           ),
                                           validator: (value) {
-                                            if (value == null || value.isEmpty) {
+                                            if (value == null ||
+                                                value.isEmpty) {
                                               return 'من فضلك أكد كلمة المرور';
                                             }
-                                            if (value != _passwordController.text) {
+                                            if (value !=
+                                                _passwordController.text) {
                                               return 'كلمة المرور غير متطابقة';
                                             }
                                             return null;
                                           },
                                         ),
-                                        SizedBox(height: isSmallScreen ? 18 : 24),
+                                        SizedBox(
+                                          height: isSmallScreen ? 18 : 24,
+                                        ),
 
                                         _buildPrimaryButton(
-                                          onPressed: _isLoading ? null : _handleRegister,
+                                          onPressed: _isLoading
+                                              ? null
+                                              : _handleRegister,
                                           isLoading: _isLoading,
                                           text: 'إنشاء حساب',
                                         ),
-                                        SizedBox(height: isSmallScreen ? 16 : 20),
+                                        SizedBox(
+                                          height: isSmallScreen ? 16 : 20,
+                                        ),
 
                                         Center(
                                           child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
                                             children: [
                                               Text(
                                                 'لديك حساب بالفعل؟',
                                                 style: TextStyle(
                                                   color: AppColors.textLight,
-                                                  fontSize: isSmallScreen ? 13 : 14,
+                                                  fontSize: isSmallScreen
+                                                      ? 13
+                                                      : 14,
                                                 ),
                                               ),
                                               TextButton(
-                                                onPressed: () => Navigator.pop(context),
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
                                                 child: Text(
                                                   'سجل دخول',
                                                   style: TextStyle(
                                                     color: AppColors.primary,
                                                     fontWeight: FontWeight.bold,
-                                                    fontSize: isSmallScreen ? 13 : 14,
+                                                    fontSize: isSmallScreen
+                                                        ? 13
+                                                        : 14,
                                                   ),
                                                 ),
                                               ),
@@ -481,8 +527,10 @@ class _RegisterScreenState extends State<RegisterScreen>
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: AppColors.error, width: 2),
             ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 14,
+            ),
           ),
           validator: validator,
         ),

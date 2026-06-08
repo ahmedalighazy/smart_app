@@ -6,6 +6,8 @@ import '../../../../core/localization/app_localizations.dart';
 import '../../../../data/services/hive_service.dart';
 import '../../../../data/services/meal_model.dart';
 import '../../../../data/services/notification_service.dart';
+import '../../../../data/services/composite_meal_service.dart';
+import '../../../../data/models/composite_meal_model.dart';
 import '../../../../logic/cubits/settings_cubit.dart';
 import 'food_categories_data.dart';
 
@@ -360,25 +362,52 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _getMealTypeColor(
-                            meal.mealType,
-                          ).withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          _getMealTypeName(meal.mealType),
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: _getMealTypeColor(meal.mealType),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _getMealTypeColor(
+                                meal.mealType,
+                              ).withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              _getMealTypeName(meal.mealType),
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: _getMealTypeColor(meal.mealType),
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 4),
+                          // زر القائمة
+                          GestureDetector(
+                            onTap: () =>
+                                _showMealOptionsMenu(context, meal, isDark),
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? Colors.grey[800]
+                                    : Colors.grey[200],
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Icon(
+                                Icons.more_vert,
+                                size: 16,
+                                color: isDark
+                                    ? Colors.grey[400]
+                                    : Colors.grey[600],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -896,14 +925,15 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
         itemBuilder: (context, index) {
           final item = items[index];
           final isSelected = selected == item['name'];
+          final foodName = item['name'] as String;
 
           return GestureDetector(
-            onTap: () => onSelect(item, item['name'] as String),
+            onTap: () => onSelect(item, foodName),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               width: 130,
               margin: const EdgeInsets.only(left: 10),
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: isSelected
                     ? AppColors.primary.withValues(alpha: 0.15)
@@ -917,39 +947,48 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (isSelected)
-                    const Icon(
-                      Icons.check_circle,
-                      color: AppColors.primary,
-                      size: 24,
-                    )
-                  else
-                    Text(
-                      category['emoji'] as String,
-                      style: const TextStyle(fontSize: 28),
+                  // اسم الطعام
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        foodName,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.w600,
+                          color: isSelected
+                              ? AppColors.primary
+                              : (isDark ? Colors.white : AppColors.textDark),
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  const SizedBox(height: 8),
-                  Text(
-                    item['name'] as String,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: isSelected
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                      color: isSelected
-                          ? AppColors.primary
-                          : (isDark ? Colors.white : AppColors.textDark),
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '🔥 ${item['calories']}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: isDark ? Colors.grey[400] : Colors.grey[600],
+                  const SizedBox(height: 8),
+                  // السعرات
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primary.withValues(alpha: 0.2)
+                          : (isDark ? Colors.grey[800] : Colors.grey[200]),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '${item['calories']} سعرة',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: isSelected
+                            ? AppColors.primary
+                            : (isDark ? Colors.grey[400] : Colors.grey[700]),
+                      ),
                     ),
                   ),
                 ],
@@ -1055,6 +1094,628 @@ class _MyMealsScreenState extends State<MyMealsScreen> {
         backgroundColor: AppColors.success,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  void _showMealOptionsMenu(BuildContext context, MealModel meal, bool isDark) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: isDark ? AppTheme.darkCard : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle
+            Container(
+              margin: const EdgeInsets.only(top: 12, bottom: 8),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[400],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            // Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+              child: Row(
+                textDirection: TextDirection.rtl,
+                children: [
+                  Text(
+                    meal.categoryEmoji,
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      meal.name,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : AppColors.textDark,
+                      ),
+                      textDirection: TextDirection.rtl,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            // Options
+            _buildMenuOption(
+              context: ctx,
+              icon: Icons.add_circle_outline,
+              title: 'إضافة',
+              subtitle: 'إضافة لوجبة مركبة',
+              color: AppColors.primary,
+              isDark: isDark,
+              onTap: () {
+                Navigator.pop(ctx);
+                _addToCompositeMeal(meal);
+              },
+            ),
+            _buildMenuOption(
+              context: ctx,
+              icon: Icons.edit_outlined,
+              title: 'تعديل',
+              subtitle: 'تعديل بيانات الوجبة',
+              color: Colors.blue,
+              isDark: isDark,
+              onTap: () {
+                Navigator.pop(ctx);
+                _editMeal(meal);
+              },
+            ),
+            _buildMenuOption(
+              context: ctx,
+              icon: Icons.delete_outline,
+              title: 'حذف',
+              subtitle: 'حذف الوجبة نهائياً',
+              color: AppColors.error,
+              isDark: isDark,
+              isLast: true,
+              onTap: () {
+                Navigator.pop(ctx);
+                _confirmDeleteMeal(meal);
+              },
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuOption({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+    required bool isDark,
+    required VoidCallback onTap,
+    bool isLast = false,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: BoxDecoration(
+          border: isLast
+              ? null
+              : Border(
+                  bottom: BorderSide(
+                    color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+                    width: 1,
+                  ),
+                ),
+        ),
+        child: Row(
+          textDirection: TextDirection.rtl,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : AppColors.textDark,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: isDark ? Colors.grey[400] : AppColors.textLight,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_back_ios_rounded,
+              size: 16,
+              color: isDark ? Colors.grey[600] : Colors.grey[400],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _addToCompositeMeal(MealModel meal) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          decoration: BoxDecoration(
+            color: isDark ? AppTheme.darkCard : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+          ),
+          child: Column(
+            children: [
+              // Handle
+              Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[400],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              // Header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                child: Row(
+                  textDirection: TextDirection.rtl,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      textDirection: TextDirection.rtl,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.add_circle,
+                            color: AppColors.primary,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'إضافة لوجبة مركبة',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: isDark
+                                    ? Colors.white
+                                    : AppColors.textDark,
+                              ),
+                            ),
+                            Text(
+                              meal.name,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: isDark
+                                    ? Colors.grey[400]
+                                    : AppColors.textLight,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      icon: Icon(
+                        Icons.close,
+                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              // زر إنشاء وجبة مركبة جديدة
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _createNewCompositeMeal(meal);
+                  },
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [AppColors.primary, AppColors.primaryDark],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      textDirection: TextDirection.rtl,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.add_circle_outline,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'إنشاء وجبة مركبة جديدة',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              // قائمة الوجبات المركبة الموجودة
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  textDirection: TextDirection.rtl,
+                  children: [
+                    Text(
+                      'أو اختر وجبة موجودة',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: ValueListenableBuilder(
+                  valueListenable: CompositeMealService.box.listenable(),
+                  builder: (context, box, _) {
+                    final meals = CompositeMealService.getAllCompositeMeals();
+
+                    if (meals.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.restaurant_menu,
+                              size: 60,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'لا توجد وجبات مركبة',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: isDark
+                                    ? Colors.grey[400]
+                                    : Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    return ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                      itemCount: meals.length,
+                      itemBuilder: (context, index) {
+                        final compositeMeal = meals[index];
+                        return _buildCompositeMealOption(
+                          ctx,
+                          compositeMeal,
+                          meal,
+                          isDark,
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCompositeMealOption(
+    BuildContext ctx,
+    CompositeMealModel compositeMeal,
+    MealModel mealToAdd,
+    bool isDark,
+  ) {
+    final nutrition = compositeMeal.totalNutrition;
+
+    return InkWell(
+      onTap: () {
+        Navigator.pop(ctx);
+        _addMealToExistingComposite(compositeMeal, mealToAdd);
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: isDark ? AppTheme.darkSurface : Colors.grey[50],
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+          ),
+        ),
+        child: Row(
+          textDirection: TextDirection.rtl,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.restaurant,
+                color: AppColors.primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    compositeMeal.name,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : AppColors.textDark,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${compositeMeal.items.length} عنصر • ${nutrition['calories']!.toStringAsFixed(0)} سعرة',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? Colors.grey[400] : Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_back_ios_rounded,
+              size: 16,
+              color: isDark ? Colors.grey[600] : Colors.grey[400],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _createNewCompositeMeal(MealModel meal) {
+    // إنشاء وجبة مركبة جديدة مع الوجبة المحددة
+    final newCompositeMeal = CompositeMealModel(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: 'وجبة مركبة جديدة',
+      items: [
+        CompositeMealItem(
+          foodName: meal.name,
+          calories: meal.calories,
+          protein: meal.protein,
+          carbs: meal.carbs,
+          fat: meal.fat,
+          categoryName: meal.categoryName,
+          categoryEmoji: meal.categoryEmoji,
+          categoryColorValue: meal.categoryColorValue,
+          quantity: 1.0,
+        ),
+      ],
+      mealType: meal.mealType,
+      createdAt: DateTime.now(),
+    );
+
+    CompositeMealService.addCompositeMeal(newCompositeMeal);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'تم إنشاء وجبة مركبة جديدة مع ${meal.name}',
+          textDirection: TextDirection.rtl,
+        ),
+        backgroundColor: AppColors.success,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        action: SnackBarAction(
+          label: 'عرض',
+          textColor: Colors.white,
+          onPressed: () {
+            Navigator.pushNamed(context, '/composite_meals');
+          },
+        ),
+      ),
+    );
+  }
+
+  void _addMealToExistingComposite(
+    CompositeMealModel compositeMeal,
+    MealModel mealToAdd,
+  ) {
+    // إضافة الوجبة للوجبة المركبة الموجودة
+    final updatedItems = List<CompositeMealItem>.from(compositeMeal.items);
+    updatedItems.add(
+      CompositeMealItem(
+        foodName: mealToAdd.name,
+        calories: mealToAdd.calories,
+        protein: mealToAdd.protein,
+        carbs: mealToAdd.carbs,
+        fat: mealToAdd.fat,
+        categoryName: mealToAdd.categoryName,
+        categoryEmoji: mealToAdd.categoryEmoji,
+        categoryColorValue: mealToAdd.categoryColorValue,
+        quantity: 1.0,
+      ),
+    );
+
+    final updatedMeal = CompositeMealModel(
+      id: compositeMeal.id,
+      name: compositeMeal.name,
+      items: updatedItems,
+      mealType: compositeMeal.mealType,
+      createdAt: compositeMeal.createdAt,
+      notes: compositeMeal.notes,
+    );
+
+    CompositeMealService.updateCompositeMeal(updatedMeal);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'تمت إضافة ${mealToAdd.name} إلى ${compositeMeal.name}',
+          textDirection: TextDirection.rtl,
+        ),
+        backgroundColor: AppColors.success,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        action: SnackBarAction(
+          label: 'عرض',
+          textColor: Colors.white,
+          onPressed: () {
+            Navigator.pushNamed(context, '/composite_meals');
+          },
+        ),
+      ),
+    );
+  }
+
+  void _editMeal(MealModel meal) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('تعديل ${meal.name}', textDirection: TextDirection.rtl),
+        backgroundColor: Colors.blue,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  void _confirmDeleteMeal(MealModel meal) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? AppTheme.darkCard
+            : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          textDirection: TextDirection.rtl,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.delete_outline,
+                color: AppColors.error,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text('حذف الوجبة'),
+          ],
+        ),
+        content: Text(
+          'هل أنت متأكد من حذف "${meal.name}"؟',
+          textDirection: TextDirection.rtl,
+          style: TextStyle(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.grey[300]
+                : AppColors.textLight,
+          ),
+        ),
+        actionsAlignment: MainAxisAlignment.spaceEvenly,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('إلغاء'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              HiveService.deleteMeal(meal.id);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'تم حذف ${meal.name}',
+                    textDirection: TextDirection.rtl,
+                  ),
+                  backgroundColor: AppColors.error,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text('حذف', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
   }

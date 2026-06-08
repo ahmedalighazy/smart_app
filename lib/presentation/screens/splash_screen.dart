@@ -8,7 +8,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
@@ -58,8 +59,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  width: 150,
-                  height: 150,
+                  width: 210,
+                  height: 210,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
@@ -72,16 +73,19 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     ],
                   ),
                   child: ClipOval(
-                    child: Image.asset(
-                      'assets/images/logo_app.jpeg',
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.restaurant_menu,
-                          size: 80,
-                          color: Color(0xFF4CAF50),
-                        );
-                      },
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      child: Image.asset(
+                        'assets/images/logo_app.jpeg',
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.restaurant_menu,
+                            size: 80,
+                            color: Color(0xFF4CAF50),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),

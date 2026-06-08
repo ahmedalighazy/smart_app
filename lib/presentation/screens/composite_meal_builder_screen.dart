@@ -179,6 +179,9 @@ class _CompositeMealBuilderScreenState
         TextField(
           controller: _nameController,
           textDirection: TextDirection.rtl,
+          onChanged: (value) {
+            setState(() {}); // تحديث الواجهة عند تغيير النص
+          },
           decoration: InputDecoration(
             hintText: 'مثال: وجبة الإفطار الصحية',
             hintStyle: TextStyle(color: AppColors.textLight),
@@ -331,8 +334,9 @@ class _CompositeMealBuilderScreenState
       child: Row(
         textDirection: TextDirection.rtl,
         children: [
-          Text(item.categoryEmoji, style: const TextStyle(fontSize: 28)),
-          const SizedBox(width: 12),
+          // تم إخفاء الإيموجي
+          // Text(item.categoryEmoji, style: const TextStyle(fontSize: 28)),
+          // const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -340,7 +344,7 @@ class _CompositeMealBuilderScreenState
                 Text(
                   item.foodName,
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 17, // تم تكبير الخط من 15 إلى 17
                     fontWeight: FontWeight.bold,
                     color: isDark ? Colors.white : AppColors.textDark,
                   ),
@@ -349,7 +353,7 @@ class _CompositeMealBuilderScreenState
                 Text(
                   '${item.calories} سعرة • ${item.protein}g بروتين',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 13, // تم تكبير الخط من 12 إلى 13
                     color: isDark ? Colors.grey[400] : AppColors.textLight,
                   ),
                 ),
@@ -665,7 +669,7 @@ class _CompositeMealBuilderScreenState
                         const Text(
                           'اختر الفئة',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -678,7 +682,7 @@ class _CompositeMealBuilderScreenState
                                 crossAxisCount: 4,
                                 crossAxisSpacing: 10,
                                 mainAxisSpacing: 10,
-                                childAspectRatio: 0.85,
+                                childAspectRatio: 1.2,
                               ),
                           itemCount: foodCategories.length,
                           itemBuilder: (context, index) {
@@ -706,22 +710,22 @@ class _CompositeMealBuilderScreenState
                                     width: 2,
                                   ),
                                 ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      cat['emoji'] as String,
-                                      style: const TextStyle(fontSize: 28),
+                                child: Center(
+                                  child: Text(
+                                    cat['name'] as String,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                      color: isSelected
+                                          ? AppColors.primary
+                                          : null,
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      cat['name'] as String,
-                                      style: const TextStyle(fontSize: 10),
-                                      textAlign: TextAlign.center,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               ),
                             );

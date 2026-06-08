@@ -347,13 +347,15 @@ class _CompositeMealsScreenState extends State<CompositeMealsScreen> {
       child: Row(
         textDirection: TextDirection.rtl,
         children: [
-          Text(item.categoryEmoji, style: const TextStyle(fontSize: 20)),
-          const SizedBox(width: 8),
+          // تم إخفاء الإيموجي
+          // Text(item.categoryEmoji, style: const TextStyle(fontSize: 20)),
+          // const SizedBox(width: 8),
           Expanded(
             child: Text(
               item.foodName,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 16, // تم تكبير الخط من 14 إلى 16
+                fontWeight: FontWeight.w500,
                 color: isDark ? Colors.white : AppColors.textDark,
               ),
             ),
@@ -368,7 +370,7 @@ class _CompositeMealsScreenState extends State<CompositeMealsScreen> {
               child: Text(
                 'x${item.quantity.toStringAsFixed(1)}',
                 style: const TextStyle(
-                  fontSize: 11,
+                  fontSize: 12, // تم تكبير الخط من 11 إلى 12
                   fontWeight: FontWeight.bold,
                   color: AppColors.primary,
                 ),

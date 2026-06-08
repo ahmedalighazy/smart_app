@@ -1,5 +1,3 @@
-// 🌟 Google Gemini Service - مجاني 100% وبدون حدود صارمة
-
 import 'dart:io';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -8,7 +6,7 @@ import 'dart:developer' as developer;
 import '../models/user_model.dart';
 
 class FoodVisionService {
-  final String apiKey = 'AIzaSyDUt3x9GaB8xiEMt9-FO_qk7PJxSnIZte4';
+  final String apiKey = 'AIzaSyDfXadTDQpFnCd0MK4iSCoxApNvE49jN3o';
 
   static DateTime? _lastRequestTime;
   static const Duration _minDelayBetweenRequests = Duration(
@@ -254,16 +252,70 @@ class FoodVisionService {
       name: 'FoodVisionService',
     );
 
+    // التحقق من المفتاح
+    if (apiKey.isEmpty ||
+        apiKey == 'YOUR_GEMINI_API_KEY_HERE' ||
+        apiKey == 'ضع-مفتاحك-هنا') {
+      throw Exception(
+        '⚠️ مفتاح Gemini API غير مُعرّف\n\n'
+        '📝 للحصول على مفتاح مجاني:\n'
+        '1. اذهب إلى: https://aistudio.google.com/app/apikey\n'
+        '2. سجل دخول بحساب Google\n'
+        '3. اضغط "Create API Key"\n'
+        '4. انسخ المفتاح وضعه في food_vision_service.dart',
+      );
+    }
+
     // الانتظار إذا لزم الأمر
     await _waitIfNeeded();
 
     try {
-      if (!await imageFile.exists()) {
-        throw Exception('الصورة غير موجودة');
+      // قراءة الصورة وتحويلها إلى base64
+      final imageBytes = await imageFile.readAsBytes();
+      final imageSizeInMB = imageBytes.length / (1024 * 1024);
+
+      developer.log(
+        '📊 Image size: ${imageSizeInMB.toStringAsFixed(2)} MB',
+        name: 'FoodVisionService',
+      );
+
+      // التحقق من حجم الصورة (الحد الأقصى 4MB)
+      if (imageSizeInMB > 4) {
+        throw Exception(
+          'حجم الصورة كبير جداً (${imageSizeInMB.toStringAsFixed(1)} MB)\n'
+          'الحد الأقصى: 4 MB\n\n'
+          'جرب التقاط صورة بجودة أقل',
+        );
       }
 
-      final bytes = await imageFile.readAsBytes();
-      final base64Image = base64Encode(bytes);
+      final base64Image = base64Encode(imageBytes);
+
+      // Prompt بسيط وواضح جداً
+      final prompt = '''
+أنت خبير تغذية. حلل هذه الصورة وأعطني المعلومات بالتنسيق التالي بالضبط (بدون أي نص إضافي):
+
+FOOD_NAME: [اسم الطعام بالعربية]
+INGREDIENTS: [المكونات الرئيسية مفصولة بفواصل]
+PORTION_SIZE: [حجم الحصة المقدر مثل: طبق متوسط، 200 جرام]
+CALORIES: [رقم فقط - السعرات الحرارية]
+PROTEIN: [رقم فقط - البروتين بالجرام]
+CARBS: [رقم فقط - الكربوهيدرات بالجرام]
+FATS: [رقم فقط - الدهون بالجرام]
+FIBER: [رقم فقط - الألياف بالجرام]
+HEALTH_RATING: [رقم من 1 إلى 10]
+TIPS: [نصيحة غذائية قصيرة بالعربية]
+DETAILED_ANALYSIS: [تحليل تفصيلي للقيمة الغذائية بالعربية]
+
+مهم جداً:
+- استخدم أرقام واقعية بناءً على حجم الحصة في الصورة
+- لا تضع أي نص قبل أو بعد التنسيق المطلوب
+- الأرقام يجب أن تكون أرقام فقط بدون كلمات (مثال: 450 وليس 450 سعرة)
+''';
+
+      developer.log(
+        '🚀 Sending request to Gemini Vision API',
+        name: 'FoodVisionService',
+      );
 
       final response = await http
           .post(
@@ -275,23 +327,7 @@ class FoodVisionService {
               'contents': [
                 {
                   'parts': [
-                    {
-                      'text': '''
-أنت خبير تغذية. حلل هذه الصورة وقدم المعلومات بهذا التنسيق بالضبط:
-
-FOOD_NAME: [اسم الطعام بالعربية]
-INGREDIENTS: [المكونات الرئيسية]
-PORTION_SIZE: [صغير أو متوسط أو كبير]
-CALORIES: [رقم فقط]
-PROTEIN: [رقم فقط]
-CARBS: [رقم فقط]
-FATS: [رقم فقط]
-FIBER: [رقم فقط]
-HEALTH_RATING: [ممتاز أو جيد أو متوسط أو ضعيف]
-TIPS: [نصيحة واحدة مختصرة]
-DETAILED_ANALYSIS: [تحليل تفصيلي]
-                  ''',
-                    },
+                    {'text': prompt},
                     {
                       'inline_data': {
                         'mime_type': 'image/jpeg',
@@ -301,36 +337,99 @@ DETAILED_ANALYSIS: [تحليل تفصيلي]
                   ],
                 },
               ],
-              'generationConfig': {
-                'temperature': 0.4,
-                'maxOutputTokens': 4000, // زيادة من 1000 إلى 4000
-              },
+              'generationConfig': {'temperature': 0.4, 'maxOutputTokens': 2048},
             }),
           )
-          .timeout(const Duration(seconds: 30));
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              throw Exception('انتهت مهلة الاتصال (30 ثانية)');
+            },
+          );
+
+      developer.log(
+        '📥 Response status: ${response.statusCode}',
+        name: 'FoodVisionService',
+      );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(utf8.decode(response.bodyBytes));
+
+        if (data['candidates'] == null || data['candidates'].isEmpty) {
+          throw Exception('لم يتم الحصول على نتائج من Gemini');
+        }
+
         final analysisText =
             data['candidates'][0]['content']['parts'][0]['text'];
+
+        developer.log(
+          '✅ Analysis received: ${analysisText.length} chars',
+          name: 'FoodVisionService',
+        );
+
+        // طباعة النص الكامل للتحقق من التنسيق
+        developer.log(
+          '📄 Full response text:\n$analysisText',
+          name: 'FoodVisionService',
+        );
+
         return _parseAnalysis(analysisText);
-      } else if (response.statusCode == 429) {
-        throw Exception('تم تجاوز حد الطلبات. انتظر 10 ثواني وحاول مرة أخرى');
-      } else if (response.statusCode == 503) {
+      } else if (response.statusCode == 400) {
+        final errorData = jsonDecode(response.body);
+        final errorMessage = errorData['error']['message'] ?? 'غير معروف';
+
+        developer.log(
+          '❌ Error 400 Response: ${response.body}',
+          name: 'FoodVisionService',
+        );
+        developer.log(
+          '❌ Error message: $errorMessage',
+          name: 'FoodVisionService',
+        );
+
         throw Exception(
-          'الخدمة غير متاحة مؤقتاً (503). انتظر دقيقة وحاول مرة أخرى',
+          '❌ خطأ في تحليل الصورة (400)\n\n'
+          'السبب المحتمل:\n'
+          '• API Key لا يدعم Vision API\n'
+          '• الصورة غير صالحة\n\n'
+          '✅ الحل:\n'
+          '1. احصل على API Key جديد من:\n'
+          '   https://aistudio.google.com/app/apikey\n'
+          '2. تأكد من تفعيل Generative Language API\n'
+          '3. استبدل المفتاح في food_vision_service.dart\n\n'
+          'التفاصيل: $errorMessage',
         );
       } else if (response.statusCode == 403) {
-        throw Exception('مفتاح API غير صحيح أو غير مفعّل');
+        throw Exception(
+          '🔑 مفتاح API غير صحيح أو غير مفعّل\n\n'
+          '✅ الحل:\n'
+          '1. تأكد من المفتاح في food_vision_service.dart\n'
+          '2. فعّل Gemini API من:\n'
+          '   https://console.cloud.google.com/apis/library/generativelanguage.googleapis.com',
+        );
+      } else if (response.statusCode == 429) {
+        throw Exception(
+          '⏱️ تم تجاوز حد الطلبات\n\n'
+          'انتظر 10 ثواني وحاول مرة أخرى',
+        );
+      } else if (response.statusCode == 503) {
+        throw Exception(
+          '🔧 الخدمة غير متاحة مؤقتاً (503)\n\n'
+          'انتظر دقيقة واحدة وحاول مرة أخرى',
+        );
       } else {
-        throw Exception('خطأ في API: ${response.statusCode}');
+        throw Exception('خطأ في الحصول على التحليل: ${response.statusCode}');
       }
+    } on SocketException catch (e) {
+      developer.log('❌ Network error', name: 'FoodVisionService', error: e);
+      throw Exception('خطأ في الاتصال بالإنترنت. تحقق من اتصالك');
     } catch (e) {
-      throw Exception('خطأ في تحليل الصورة: $e');
+      developer.log('❌ Could not parse error: $e', name: 'FoodVisionService');
+      rethrow;
     }
   }
 
-  // باقي الدوال كما هي...
+  // تحليل النص المُرجع من Gemini
   FoodAnalysisResult _parseAnalysis(String text) {
     try {
       return FoodAnalysisResult(
@@ -362,9 +461,52 @@ DETAILED_ANALYSIS: [تحليل تفصيلي]
   }
 
   int _extractNumber(String text, String field) {
-    RegExp regex = RegExp('$field:\\s*(\\d+)');
-    Match? match = regex.firstMatch(text);
-    return match != null ? int.parse(match.group(1)!) : 0;
+    // محاولة 1: البحث عن النمط الأساسي (FIELD: 123)
+    RegExp regex1 = RegExp('$field:\\s*(\\d+)', caseSensitive: false);
+    Match? match1 = regex1.firstMatch(text);
+    if (match1 != null) {
+      developer.log(
+        '✅ Found $field: ${match1.group(1)}',
+        name: 'FoodVisionService',
+      );
+      return int.parse(match1.group(1)!);
+    }
+
+    // محاولة 2: البحث عن أرقام مع كلمات عربية (123 سعرة، 45 جرام)
+    RegExp regex2 = RegExp(
+      '$field[:\\s]*(\\d+)\\s*(?:سعرة|جرام|غرام|g)?',
+      caseSensitive: false,
+    );
+    Match? match2 = regex2.firstMatch(text);
+    if (match2 != null) {
+      developer.log(
+        '✅ Found $field (Arabic): ${match2.group(1)}',
+        name: 'FoodVisionService',
+      );
+      return int.parse(match2.group(1)!);
+    }
+
+    // محاولة 3: البحث في السطر الكامل
+    List<String> lines = text.split('\n');
+    for (String line in lines) {
+      if (line.toUpperCase().contains(field.toUpperCase())) {
+        RegExp numRegex = RegExp(r'(\d+)');
+        Match? numMatch = numRegex.firstMatch(line);
+        if (numMatch != null) {
+          developer.log(
+            '✅ Found $field (line): ${numMatch.group(1)}',
+            name: 'FoodVisionService',
+          );
+          return int.parse(numMatch.group(1)!);
+        }
+      }
+    }
+
+    developer.log(
+      '⚠️ Could not find $field, returning 0',
+      name: 'FoodVisionService',
+    );
+    return 0;
   }
 
   String _getActivityLevelArabic(String level) {
